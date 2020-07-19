@@ -1,7 +1,31 @@
+import random
 import tkinter as tk
 from tkinter import ttk
 
 LARGE_FONT = ("Verdana", 12)
+
+complex_questions = (
+  {
+    "question": "What is the conjugate of 1 + 2i?",
+    "answers": {
+      "a": '2i',
+      "b": '(-1 - 2i)',
+      "c": '(-1 + 2i)',
+      "d": '(1 - 2i)'
+    },
+    "correct_answer": 'd'
+  },
+  {
+    "question": "Simplify (i^3).",
+    "answers": {
+      "a": '(-i)',
+      "b": '(i)',
+      "c": '(-1)',
+      "d": '(1)'
+    },
+    "correct_answer": 'a'
+  }
+)
 
 def combine_funcs(*funcs):
         """A function designed to return multiple functions for the tkinter button commands"""
@@ -9,6 +33,11 @@ def combine_funcs(*funcs):
                 for f in funcs:
                         f(*args, **kwargs)
         return combined_func
+
+def randomizer(*questions):
+        """A function which randomizes a list, and returns the randomized list"""
+        randomized_questions = random.sample(range(0, int(len(questions))+1), int(len(questions))+1)
+        return randomized_questions
 
 class ok_popup:
         """Simply opens a new tkinter window when called. Its only button/method is the OK button."""
