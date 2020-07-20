@@ -24,6 +24,86 @@ complex_questions = (
       "d": '(1)'
     },
     "correct_answer": 'a'
+  },
+  {
+    "question": "",
+    "answers": {
+      "a": '',
+      "b": '',
+      "c": '',
+      "d": ''
+    },
+    "correct_answer": ''
+  },
+  {
+    "question": "",
+    "answers": {
+      "a": '',
+      "b": '',
+      "c": '',
+      "d": ''
+    },
+    "correct_answer": ''
+  },
+  {
+    "question": "",
+    "answers": {
+      "a": '',
+      "b": '',
+      "c": '',
+      "d": ''
+    },
+    "correct_answer": ''
+  },
+  {
+    "question": "",
+    "answers": {
+      "a": '',
+      "b": '',
+      "c": '',
+      "d": ''
+    },
+    "correct_answer": ''
+  },
+  {
+    "question": "",
+    "answers": {
+      "a": '',
+      "b": '',
+      "c": '',
+      "d": ''
+    },
+    "correct_answer": ''
+  },
+  {
+    "question": "",
+    "answers": {
+      "a": '',
+      "b": '',
+      "c": '',
+      "d": ''
+    },
+    "correct_answer": ''
+  },
+  {
+    "question": "",
+    "answers": {
+      "a": '',
+      "b": '',
+      "c": '',
+      "d": ''
+    },
+    "correct_answer": ''
+  },
+  {
+    "question": "",
+    "answers": {
+      "a": '',
+      "b": '',
+      "c": '',
+      "d": ''
+    },
+    "correct_answer": ''
   }
 )
 
@@ -105,6 +185,8 @@ class rootFrame(tk.Tk):
                 self.differentiation_test = tk.BooleanVar(self)
                 self.integration_test = tk.BooleanVar(self)
 
+                self.score = 0
+
                 self.frames = {}
 
                 for f in (startingPage, selectionPage):
@@ -118,12 +200,22 @@ class rootFrame(tk.Tk):
                 frame = self.frames[cont]
                 frame.tkraise()
 
-        def generate_quiz(self, questions):
-                """This method is the same as the for loop in the __init__, except it passes each question as its own instance"""
+        def generate_question_list(self, *question_lists):
+                pass
+
+        def generate_quiz(self, question_list):
+                """This method is the same as the for loop in the __init__, except it passes each question as its own instance
+                It takes from a quesiton_list generated from the types of question chosen by the user"""
                 for question in range(10):
-                        frame = questionPage(self.container, self, question)
+                        frame = questionPage(self.container, self, question, question_list)
                         self.frames["questionPage" + str(question)] = frame
                         frame.grid(row=0, column=0, sticky="nsew")
+
+        def check_answer(self, answer, correct_answer):
+                """Checks if the answer selected by a button is correct"""
+                if answer == correct_answer:
+                        self.score += 1
+                
 
 class startingPage(tk.Frame):
         """This page contains a next button to the selection page"""
@@ -139,9 +231,11 @@ class startingPage(tk.Frame):
                 popup_button.grid(row=0,column=2)
 
 class selectionPage(tk.Frame):
-        """This page contains check buttons to toggle which type of question will be asked in the quiz"""
+        """This page contains check buttons to toggle which type of question will be asked in the quiz
+        It toggles if the question_list will include complex, differentiation and/or integration, and whether it's separated by section"""
         def __init__(self, parent, controller):
                 tk.Frame.__init__(self, parent)
+                controller.generate_quiz(complex_questions)
                 label = ttk.Label(self, text="This is the section page", font=LARGE_FONT)
                 label.pack(pady=10,padx=10)
 
@@ -152,20 +246,29 @@ class selectionPage(tk.Frame):
                 differentiation_check.pack()
                 integration_check.pack()
 
-                button = ttk.Button(self, text="Start Quiz", command=lambda: combine_funcs(controller.generate_quiz(0), controller.show_frame("questionPage0")))
+                button = ttk.Button(self, text="Start Quiz", command=lambda: controller.show_frame("questionPage0"))
                 button.pack()
 
 class questionPage(tk.Frame):
         """This is the general frame for questions, which will change depending on the number and type of question asked
-        There will always be multiple instances of this object"""
-        def __init__(self, parent, controller, number):
+        There will always be multiple instances of this object
+        For each instance of a questionPage, the number increments by one, which takes the next question in the question_list
+        This question_list is generated based on the checkboxes the user checked before"""
+        def __init__(self, parent, controller, number, question_list):
                 tk.Frame.__init__(self, parent)
                 text = "A question" + str(number+1)
                 label = ttk.Label(self, text=text, font=LARGE_FONT)
                 label.pack(pady=10,padx=10)
+                
+                question = ttk.Label(self, text=question_list[number]['question'])
+                question.pack()
 
-                button = ttk.Button(self, text="next question", command=lambda: controller.show_frame("questionPage" + str(number+1)))
-                button.pack()
+                """The function here generates buttons of each answer. Each button has the command to check if it was right, and then move to the next frame.
+                I've put this into a for loop to make it easier to program"""
+                for a in ['a','b','c','d']:
+                        answer = ttk.Button(self, text=question_list[number]['answers'][a], command=lambda: combine_funcs(controller.check_answer(a, question_list[number]["correct_answer"]), controller.show_frame("questionPage" + str(number+1))))
+                        answer.pack()
+
 
 quiz = rootFrame()
 quiz.geometry("500x300")
