@@ -4,7 +4,8 @@ from tkinter import ttk
 
 LARGE_FONT = ("Verdana", 12)
 
-complex_questions = (
+complex_questions = {
+        "easy": [
   {
     "question": "What is the conjugate of 1 + 2i?",
     "answers": {
@@ -54,9 +55,10 @@ complex_questions = (
       "d": ''
     },
     "correct_answer": ''
-  },
+  }],
+        "medium": [
   {
-    "question": "",
+    "question": "test",
     "answers": {
       "a": '',
       "b": '',
@@ -104,8 +106,69 @@ complex_questions = (
       "d": ''
     },
     "correct_answer": ''
-  }
-)
+  },
+  {
+    "question": "",
+    "answers": {
+      "a": '',
+      "b": '',
+      "c": '',
+      "d": ''
+    },
+    "correct_answer": ''
+  }],
+        "hard": [
+  {
+    "question": "test2",
+    "answers": {
+      "a": '',
+      "b": '',
+      "c": '',
+      "d": ''
+    },
+    "correct_answer": ''
+  },
+  {
+    "question": "",
+    "answers": {
+      "a": '',
+      "b": '',
+      "c": '',
+      "d": ''
+    },
+    "correct_answer": ''
+  },
+  {
+    "question": "",
+    "answers": {
+      "a": '',
+      "b": '',
+      "c": '',
+      "d": ''
+    },
+    "correct_answer": ''
+  },
+  {
+    "question": "",
+    "answers": {
+      "a": '',
+      "b": '',
+      "c": '',
+      "d": ''
+    },
+    "correct_answer": ''
+  },
+  {
+    "question": "",
+    "answers": {
+      "a": '',
+      "b": '',
+      "c": '',
+      "d": ''
+    },
+    "correct_answer": ''
+  }]
+}
 
 def combine_funcs(*funcs):
         """A function designed to return multiple functions for the tkinter button commands"""
@@ -185,6 +248,8 @@ class rootFrame(tk.Tk):
                 self.differentiation_test = tk.BooleanVar(self)
                 self.integration_test = tk.BooleanVar(self)
 
+                self.section_check = tk.BooleanVar(self)
+
                 self.score = 0
 
                 self.frames = {}
@@ -206,10 +271,13 @@ class rootFrame(tk.Tk):
         def generate_quiz(self, question_list):
                 """This method is the same as the for loop in the __init__, except it passes each question as its own instance
                 It takes from a quesiton_list generated from the types of question chosen by the user"""
-                for question in range(10):
-                        frame = questionPage(self.container, self, question, question_list)
-                        self.frames["questionPage" + str(question)] = frame
-                        frame.grid(row=0, column=0, sticky="nsew")
+                if self.section_check.get() == False:
+                        for question in range(8):
+                                frame = questionPage(self.container, self, question, question_list)
+                                self.frames["questionPage" + str(question)] = frame
+                                frame.grid(row=0, column=0, sticky="nsew")
+                else:
+                        pass
 
         def check_answer(self, answer, correct_answer):
                 """Checks if the answer selected by a button is correct"""
@@ -235,7 +303,6 @@ class selectionPage(tk.Frame):
         It toggles if the question_list will include complex, differentiation and/or integration, and whether it's separated by section"""
         def __init__(self, parent, controller):
                 tk.Frame.__init__(self, parent)
-                controller.generate_quiz(complex_questions)
                 label = ttk.Label(self, text="This is the section page", font=LARGE_FONT)
                 label.pack(pady=10,padx=10)
 
@@ -246,7 +313,12 @@ class selectionPage(tk.Frame):
                 differentiation_check.pack()
                 integration_check.pack()
 
-                button = ttk.Button(self, text="Start Quiz", command=lambda: controller.show_frame("questionPage0"))
+                section_check_on = ttk.Radiobutton(self, text="Sections On", variable=controller.section_check, value=True)
+                section_check_off = ttk.Radiobutton(self, text="Sections Off", variable=controller.section_check, value=False)
+                section_check_on.pack()
+                section_check_off.pack()
+
+                button = ttk.Button(self, text="Start Quiz", command=lambda: combine_funcs(controller.generate_quiz(complex_questions), controller.show_frame("questionPage0")))
                 button.pack()
 
 class questionPage(tk.Frame):
@@ -259,15 +331,24 @@ class questionPage(tk.Frame):
                 text = "A question" + str(number+1)
                 label = ttk.Label(self, text=text, font=LARGE_FONT)
                 label.pack(pady=10,padx=10)
-                
-                question = ttk.Label(self, text=question_list[number]['question'])
+
+                if number <= 1:
+                        difficulty = "easy"
+                elif number <= 4:
+                        difficulty = "medium"
+                else:
+                        difficulty = "hard"
+                        
+                question = ttk.Label(self, text=question_list[difficulty][0]['question'])
                 question.pack()
 
                 """The function here generates buttons of each answer. Each button has the command to check if it was right, and then move to the next frame.
                 I've put this into a for loop to make it easier to program"""
                 for a in ['a','b','c','d']:
-                        answer = ttk.Button(self, text=question_list[number]['answers'][a], command=lambda: combine_funcs(controller.check_answer(a, question_list[number]["correct_answer"]), controller.show_frame("questionPage" + str(number+1))))
+                        answer = ttk.Button(self, text=question_list[difficulty][0]['answers'][a], command=lambda: combine_funcs(controller.check_answer(a, question_list[difficulty][0]["correct_answer"]), controller.show_frame("questionPage" + str(number+1))))
                         answer.pack()
+                
+                del question_list[difficulty][0]
 
 
 quiz = rootFrame()
