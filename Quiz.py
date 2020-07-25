@@ -27,146 +27,166 @@ complex_questions = {
     "correct_answer": 'a'
   },
   {
-    "question": "",
+    "question": "easy3",
     "answers": {
-      "a": '',
-      "b": '',
-      "c": '',
-      "d": ''
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
     },
-    "correct_answer": ''
+    "correct_answer": 'a'
   },
   {
-    "question": "",
+    "question": "easy4",
     "answers": {
-      "a": '',
-      "b": '',
-      "c": '',
-      "d": ''
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
     },
-    "correct_answer": ''
+    "correct_answer": 'a'
   },
   {
-    "question": "",
+    "question": "easy5",
     "answers": {
-      "a": '',
-      "b": '',
-      "c": '',
-      "d": ''
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
     },
-    "correct_answer": ''
+    "correct_answer": 'a'
+  },
+  {
+    "question": "easy6",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
   }],
         "medium": [
   {
     "question": "test",
     "answers": {
-      "a": '',
-      "b": '',
-      "c": '',
-      "d": ''
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
     },
-    "correct_answer": ''
+    "correct_answer": 'a'
   },
   {
-    "question": "",
+    "question": "medium1",
     "answers": {
-      "a": '',
-      "b": '',
-      "c": '',
-      "d": ''
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
     },
-    "correct_answer": ''
+    "correct_answer": 'a'
   },
   {
-    "question": "",
+    "question": "medium2",
     "answers": {
-      "a": '',
-      "b": '',
-      "c": '',
-      "d": ''
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
     },
-    "correct_answer": ''
+    "correct_answer": 'a'
   },
   {
-    "question": "",
+    "question": "medium3",
     "answers": {
-      "a": '',
-      "b": '',
-      "c": '',
-      "d": ''
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
     },
-    "correct_answer": ''
+    "correct_answer": 'a'
   },
   {
-    "question": "",
+    "question": "medium4",
     "answers": {
-      "a": '',
-      "b": '',
-      "c": '',
-      "d": ''
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
     },
-    "correct_answer": ''
+    "correct_answer": 'a'
   },
   {
-    "question": "",
+    "question": "medium5",
     "answers": {
-      "a": '',
-      "b": '',
-      "c": '',
-      "d": ''
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
     },
-    "correct_answer": ''
+    "correct_answer": 'a'
+  },
+  {
+    "question": "medium6",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "medium7",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
   }],
         "hard": [
   {
-    "question": "test2",
+    "question": "hard1",
     "answers": {
-      "a": '',
-      "b": '',
-      "c": '',
-      "d": ''
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
     },
-    "correct_answer": ''
+    "correct_answer": 'a'
   },
   {
-    "question": "",
+    "question": "hard2",
     "answers": {
-      "a": '',
-      "b": '',
-      "c": '',
-      "d": ''
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
     },
-    "correct_answer": ''
+    "correct_answer": 'a'
   },
   {
-    "question": "",
+    "question": "hard3",
     "answers": {
-      "a": '',
-      "b": '',
-      "c": '',
-      "d": ''
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
     },
-    "correct_answer": ''
+    "correct_answer": 'a'
   },
   {
-    "question": "",
+    "question": "hard4",
     "answers": {
-      "a": '',
-      "b": '',
-      "c": '',
-      "d": ''
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
     },
-    "correct_answer": ''
-  },
-  {
-    "question": "",
-    "answers": {
-      "a": '',
-      "b": '',
-      "c": '',
-      "d": ''
-    },
-    "correct_answer": ''
+    "correct_answer": 'a'
   }]
 }
 
@@ -176,11 +196,6 @@ def combine_funcs(*funcs):
                 for f in funcs:
                         f(*args, **kwargs)
         return combined_func
-
-def randomizer(*questions):
-        """A function which randomizes a list, and returns the randomized list"""
-        randomized_questions = random.sample(range(0, int(len(questions))+1), int(len(questions))+1)
-        return randomized_questions
 
 class ok_popup:
         """Simply opens a new tkinter window when called. Its only button/method is the OK button."""
@@ -250,7 +265,7 @@ class rootFrame(tk.Tk):
 
                 self.section_check = tk.BooleanVar(self)
 
-                self.score = 0
+                self.score = tk.IntVar(self, 0)
 
                 self.frames = {}
 
@@ -265,15 +280,19 @@ class rootFrame(tk.Tk):
                 frame = self.frames[cont]
                 frame.tkraise()
 
-        def generate_question_list(self, *question_lists):
-                pass
-
         def generate_quiz(self, question_list):
                 """This method is the same as the for loop in the __init__, except it passes each question as its own instance
                 It takes from a quesiton_list generated from the types of question chosen by the user"""
                 if self.section_check.get() == False:
-                        for question in range(8):
-                                frame = questionPage(self.container, self, question, question_list)
+                        for question in range(10):
+                                if question <= 3:
+                                        difficulty = "easy"
+                                elif question <= 8:
+                                        difficulty = "medium"
+                                else:
+                                        difficulty = "hard"
+                                random.shuffle(question_list[difficulty])
+                                frame = questionPage(self.container, self, question, question_list[difficulty])
                                 self.frames["questionPage" + str(question)] = frame
                                 frame.grid(row=0, column=0, sticky="nsew")
                 else:
@@ -282,7 +301,7 @@ class rootFrame(tk.Tk):
         def check_answer(self, answer, correct_answer):
                 """Checks if the answer selected by a button is correct"""
                 if answer == correct_answer:
-                        self.score += 1
+                        self.score.set(self.score.get()+1)
                 
 
 class startingPage(tk.Frame):
@@ -328,27 +347,27 @@ class questionPage(tk.Frame):
         This question_list is generated based on the checkboxes the user checked before"""
         def __init__(self, parent, controller, number, question_list):
                 tk.Frame.__init__(self, parent)
+                self.question_list = question_list
                 text = "A question" + str(number+1)
                 label = ttk.Label(self, text=text, font=LARGE_FONT)
                 label.pack(pady=10,padx=10)
 
-                if number <= 1:
-                        difficulty = "easy"
-                elif number <= 4:
-                        difficulty = "medium"
-                else:
-                        difficulty = "hard"
-                        
-                question = ttk.Label(self, text=question_list[difficulty][0]['question'])
+                """Essentially, each question is index 0 of the shuffled list. At the end, this index is deleted, so that old index 1 becomes index 0.
+                This way, no question is repeated."""
+                question = ttk.Label(self, text=self.question_list[0]['question'])
                 question.pack()
 
-                """The function here generates buttons of each answer. Each button has the command to check if it was right, and then move to the next frame.
+                answer = {}
+                """The for loop here generates buttons of each answer. Each button has the command to check if it was right, and then move to the next frame.
                 I've put this into a for loop to make it easier to program"""
-                for a in ['a','b','c','d']:
-                        answer = ttk.Button(self, text=question_list[difficulty][0]['answers'][a], command=lambda: combine_funcs(controller.check_answer(a, question_list[difficulty][0]["correct_answer"]), controller.show_frame("questionPage" + str(number+1))))
-                        answer.pack()
+                for letter in ['a','b','c','d']:
+                        answer[letter] = ttk.Button(self, text=self.question_list[0]['answers'][letter], command=lambda letter=letter, correct_letter=self.question_list[0]["correct_answer"]: combine_funcs(controller.check_answer(letter, correct_letter), controller.show_frame("questionPage" + str(number+1))))
+                        answer[letter].pack()
                 
-                del question_list[difficulty][0]
+                del self.question_list[0]
+
+                answers_correct = ttk.Label(self, textvariable=controller.score)
+                answers_correct.pack()
 
 
 quiz = rootFrame()
