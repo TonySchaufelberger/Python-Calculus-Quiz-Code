@@ -4,10 +4,9 @@ from tkinter import ttk
 
 LARGE_FONT = ("Verdana", 12)
 
-complex_questions = {
-        "easy": [
+differentiation_questions = {"easy": [
   {
-    "question": "What is the conjugate of 1 + 2i?",
+    "question": "differentiation:What is the conjugate of 1 + 2i?",
     "answers": {
       "a": '2i',
       "b": '(-1 - 2i)',
@@ -17,7 +16,7 @@ complex_questions = {
     "correct_answer": 'd'
   },
   {
-    "question": "Simplify (i^3).",
+    "question": "differentiation:Simplify (i^3).",
     "answers": {
       "a": '(-i)',
       "b": '(i)',
@@ -27,7 +26,7 @@ complex_questions = {
     "correct_answer": 'a'
   },
   {
-    "question": "easy3",
+    "question": "differentiation:easy3",
     "answers": {
       "a": 'a',
       "b": 'b',
@@ -37,7 +36,7 @@ complex_questions = {
     "correct_answer": 'a'
   },
   {
-    "question": "easy4",
+    "question": "differentiation:easy4",
     "answers": {
       "a": 'a',
       "b": 'b',
@@ -47,7 +46,7 @@ complex_questions = {
     "correct_answer": 'a'
   },
   {
-    "question": "easy5",
+    "question": "differentiation:easy5",
     "answers": {
       "a": 'a',
       "b": 'b',
@@ -57,7 +56,7 @@ complex_questions = {
     "correct_answer": 'a'
   },
   {
-    "question": "easy6",
+    "question": "differentiation:easy6",
     "answers": {
       "a": 'a',
       "b": 'b',
@@ -68,7 +67,7 @@ complex_questions = {
   }],
         "medium": [
   {
-    "question": "test",
+    "question": "differentiation:test",
     "answers": {
       "a": 'a',
       "b": 'b',
@@ -78,7 +77,7 @@ complex_questions = {
     "correct_answer": 'a'
   },
   {
-    "question": "medium1",
+    "question": "differentiation:medium1",
     "answers": {
       "a": 'a',
       "b": 'b',
@@ -88,7 +87,7 @@ complex_questions = {
     "correct_answer": 'a'
   },
   {
-    "question": "medium2",
+    "question": "differentiation:medium2",
     "answers": {
       "a": 'a',
       "b": 'b',
@@ -98,7 +97,7 @@ complex_questions = {
     "correct_answer": 'a'
   },
   {
-    "question": "medium3",
+    "question": "differentiation:medium3",
     "answers": {
       "a": 'a',
       "b": 'b',
@@ -108,7 +107,7 @@ complex_questions = {
     "correct_answer": 'a'
   },
   {
-    "question": "medium4",
+    "question": "differentiation:medium4",
     "answers": {
       "a": 'a',
       "b": 'b',
@@ -118,7 +117,7 @@ complex_questions = {
     "correct_answer": 'a'
   },
   {
-    "question": "medium5",
+    "question": "differentiation:medium5",
     "answers": {
       "a": 'a',
       "b": 'b',
@@ -128,7 +127,7 @@ complex_questions = {
     "correct_answer": 'a'
   },
   {
-    "question": "medium6",
+    "question": "differentiation:medium6",
     "answers": {
       "a": 'a',
       "b": 'b',
@@ -138,7 +137,7 @@ complex_questions = {
     "correct_answer": 'a'
   },
   {
-    "question": "medium7",
+    "question": "differentiation:medium7",
     "answers": {
       "a": 'a',
       "b": 'b',
@@ -149,7 +148,7 @@ complex_questions = {
   }],
         "hard": [
   {
-    "question": "hard1",
+    "question": "differentiation:hard1",
     "answers": {
       "a": 'a',
       "b": 'b',
@@ -159,7 +158,7 @@ complex_questions = {
     "correct_answer": 'a'
   },
   {
-    "question": "hard2",
+    "question": "differentiation:hard2",
     "answers": {
       "a": 'a',
       "b": 'b',
@@ -169,7 +168,7 @@ complex_questions = {
     "correct_answer": 'a'
   },
   {
-    "question": "hard3",
+    "question": "differentiation:hard3",
     "answers": {
       "a": 'a',
       "b": 'b',
@@ -179,7 +178,378 @@ complex_questions = {
     "correct_answer": 'a'
   },
   {
-    "question": "hard4",
+    "question": "differentiation:hard4",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  }]
+}
+
+integration_questions = {"easy": [
+  {
+    "question": "integration:What is the conjugate of 1 + 2i?",
+    "answers": {
+      "a": '2i',
+      "b": '(-1 - 2i)',
+      "c": '(-1 + 2i)',
+      "d": '(1 - 2i)'
+    },
+    "correct_answer": 'd'
+  },
+  {
+    "question": "integration:Simplify (i^3).",
+    "answers": {
+      "a": '(-i)',
+      "b": '(i)',
+      "c": '(-1)',
+      "d": '(1)'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "integration:easy3",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "integration:easy4",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "integration:easy5",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "integration:easy6",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  }],
+        "medium": [
+  {
+    "question": "integration:test",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "integration:medium1",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "integration:medium2",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "integration:medium3",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "integration:medium4",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "integration:medium5",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "integration:medium6",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "integration:medium7",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  }],
+        "hard": [
+  {
+    "question": "integration:hard1",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "integration:hard2",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "integration:hard3",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "integration:hard4",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  }]
+}
+
+complex_questions = {
+        "easy": [
+  {
+    "question": "complex:What is the conjugate of 1 + 2i?",
+    "answers": {
+      "a": '2i',
+      "b": '(-1 - 2i)',
+      "c": '(-1 + 2i)',
+      "d": '(1 - 2i)'
+    },
+    "correct_answer": 'd'
+  },
+  {
+    "question": "complex:Simplify (i^3).",
+    "answers": {
+      "a": '(-i)',
+      "b": '(i)',
+      "c": '(-1)',
+      "d": '(1)'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "complex:easy3",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "complex:easy4",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "complex:easy5",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "complex:easy6",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  }],
+        "medium": [
+  {
+    "question": "complex:test",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "complex:medium1",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "complex:medium2",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "complex:medium3",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "complex:medium4",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "complex:medium5",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "complex:medium6",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "complex:medium7",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  }],
+        "hard": [
+  {
+    "question": "complex:hard1",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "complex:hard2",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "complex:hard3",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
+  },
+  {
+    "question": "complex:hard4",
     "answers": {
       "a": 'a',
       "b": 'b',
@@ -280,19 +650,23 @@ class rootFrame(tk.Tk):
                 frame = self.frames[cont]
                 frame.tkraise()
 
-        def generate_quiz(self, question_list):
+        def generate_quiz(self, *question_lists):
                 """This method is the same as the for loop in the __init__, except it passes each question as its own instance
                 It takes from a quesiton_list generated from the types of question chosen by the user"""
                 if self.section_check.get() == False:
+                        new_list = {"easy": [], "medium": [], "hard":[]}
                         for question in range(10):
+                                i = random.randint(0,2)
                                 if question <= 3:
                                         difficulty = "easy"
                                 elif question <= 8:
                                         difficulty = "medium"
                                 else:
                                         difficulty = "hard"
-                                random.shuffle(question_list[difficulty])
-                                frame = questionPage(self.container, self, question, question_list[difficulty])
+                                random.shuffle(question_lists[i][difficulty])
+                                new_list[difficulty] += [question_lists[i][difficulty][0]]
+
+                                frame = questionPage(self.container, self, question, new_list[difficulty])
                                 self.frames["questionPage" + str(question)] = frame
                                 frame.grid(row=0, column=0, sticky="nsew")
                 else:
@@ -337,7 +711,7 @@ class selectionPage(tk.Frame):
                 section_check_on.pack()
                 section_check_off.pack()
 
-                button = ttk.Button(self, text="Start Quiz", command=lambda: combine_funcs(controller.generate_quiz(complex_questions), controller.show_frame("questionPage0")))
+                button = ttk.Button(self, text="Start Quiz", command=lambda: combine_funcs(controller.generate_quiz(complex_questions, integration_questions, differentiation_questions), controller.show_frame("questionPage0")))
                 button.pack()
 
 class questionPage(tk.Frame):
