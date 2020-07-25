@@ -656,7 +656,7 @@ class rootFrame(tk.Tk):
                 if self.section_check.get() == False:
                         new_list = {"easy": [], "medium": [], "hard":[]}
                         for question in range(10):
-                                i = random.randint(0,2)
+                                i = random.randint(0,len(question_lists)-1)
                                 if question <= 3:
                                         difficulty = "easy"
                                 elif question <= 8:
@@ -676,6 +676,16 @@ class rootFrame(tk.Tk):
                 """Checks if the answer selected by a button is correct"""
                 if answer == correct_answer:
                         self.score.set(self.score.get()+1)
+
+        def check_section(self):
+                sections = []
+                if self.complex_test.get() == True:
+                        sections += complex_questions
+                if self.differentiation_test.get() == True:
+                        sections += differentiation_questions
+                if self.integration_test.get() == True:
+                        sections += integration_questions
+                return sections
                 
 
 class startingPage(tk.Frame):
@@ -711,7 +721,7 @@ class selectionPage(tk.Frame):
                 section_check_on.pack()
                 section_check_off.pack()
 
-                button = ttk.Button(self, text="Start Quiz", command=lambda: combine_funcs(controller.generate_quiz(complex_questions, integration_questions, differentiation_questions), controller.show_frame("questionPage0")))
+                button = ttk.Button(self, text="Start Quiz", command=lambda: combine_funcs(controller.generate_quiz(controller.check_section()), controller.show_frame("questionPage0")))
                 button.pack()
 
 class questionPage(tk.Frame):
