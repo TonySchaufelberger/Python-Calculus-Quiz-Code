@@ -557,6 +557,16 @@ complex_questions = {
       "d": 'd'
     },
     "correct_answer": 'a'
+  },
+  {
+    "question": "complex:hard5",
+    "answers": {
+      "a": 'a',
+      "b": 'b',
+      "c": 'c',
+      "d": 'd'
+    },
+    "correct_answer": 'a'
   }]
 }
 
@@ -653,24 +663,28 @@ class rootFrame(tk.Tk):
         def generate_quiz(self, *question_lists):
                 """This method is the same as the for loop in the __init__, except it passes each question as its own instance
                 It takes from a quesiton_list generated from the types of question chosen by the user"""
-                if self.section_check.get() == False:
-                        new_list = {"easy": [], "medium": [], "hard":[]}
-                        for question in range(10):
-                                i = random.randint(0,len(question_lists)-1)
-                                if question <= 3:
-                                        difficulty = "easy"
-                                elif question <= 8:
-                                        difficulty = "medium"
-                                else:
-                                        difficulty = "hard"
-                                random.shuffle(question_lists[i][difficulty])
-                                new_list[difficulty] += [question_lists[i][difficulty][0]]
+                length = len(question_lists[0])*10
+                section_length = 0
+                for question in range(length):
+                        if self.section_check.get() == True:
+                                section_length = 10
+                                i = int((length / 10) - 1)
+                                print(i)
+                        else:
+                                i = random.randint(0,len(question_lists[0])-1)
+                                        
+                        if question <= length / 3 - (2 * section_length / 3):
+                                difficulty = "easy"
+                        elif question <= (3 * length / 4) - (section_length / 4):
+                                difficulty = "medium"
+                        else:
+                                difficulty = "hard"
+                        random.shuffle(question_lists[0][i][difficulty])
 
-                                frame = questionPage(self.container, self, question, new_list[difficulty])
-                                self.frames["questionPage" + str(question)] = frame
-                                frame.grid(row=0, column=0, sticky="nsew")
-                else:
-                        pass
+                        print(question_lists[0][i][difficulty][0])
+                        frame = questionPage(self.container, self, question, question_lists[0][i][difficulty])
+                        self.frames["questionPage" + str(question)] = frame
+                        frame.grid(row=0, column=0, sticky="nsew")
 
         def check_answer(self, answer, correct_answer):
                 """Checks if the answer selected by a button is correct"""
@@ -680,13 +694,12 @@ class rootFrame(tk.Tk):
         def check_section(self):
                 sections = []
                 if self.complex_test.get() == True:
-                        sections += complex_questions
+                        sections += [complex_questions]
                 if self.differentiation_test.get() == True:
-                        sections += differentiation_questions
+                        sections += [differentiation_questions]
                 if self.integration_test.get() == True:
-                        sections += integration_questions
+                        sections += [integration_questions]
                 return sections
-                
 
 class startingPage(tk.Frame):
         """This page contains a next button to the selection page"""
