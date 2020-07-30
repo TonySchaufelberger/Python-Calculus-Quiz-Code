@@ -6,7 +6,6 @@ from tkinter import ttk
 
 LARGE_FONT = ("Verdana", 12)
 
-
 def combine_funcs(*funcs):
         """A function designed to return multiple functions for the tkinter button commands"""
         def combined_func(*args, **kwargs):
@@ -81,7 +80,7 @@ class rootFrame(tk.Tk):
                 self.integration_test = tk.BooleanVar(self)
 
                 self.section_check = tk.BooleanVar(self)
-
+                
                 self.score = tk.IntVar(self, 0)
 
                 self.frames = {}
@@ -102,20 +101,23 @@ class rootFrame(tk.Tk):
                 It takes from a quesiton_list generated from the types of question chosen by the user"""
                 length = len(question_lists[0])*10
                 new_list = {"easy": [], "medium": [], "hard": []}
-                section_length = 0
+                section_length = 10
                 modifier = 1
                 for question in range(length):
                         if self.section_check.get() == True:
                                 modifier = math.floor(question / 10)
-                                print(modifier * section_length + (3 * length / 4))
-                                section_length = 10
-                                i = int(len(question_lists) - 1)
+                                i = modifier
+                                easy_length = 3
+                                medium_length = 7
                         else:
                                 i = random.randint(0,len(question_lists[0])-1)
+                                easy_length = (length / 3)
+                                medium_length = (3 * length / 4)
+                                section_length = 0
                                         
-                        if question <= modifier * section_length + (length / 3):
+                        if question <= modifier * section_length + easy_length:
                                 difficulty = "easy"
-                        elif question <= modifier * section_length + (3 * length / 4):
+                        elif question <= modifier * section_length + medium_length:
                                 difficulty = "medium"
                         else:
                                 difficulty = "hard"
@@ -207,6 +209,8 @@ class questionPage(tk.Frame):
                 answers_correct = ttk.Label(self, textvariable=controller.score)
                 answers_correct.pack()
 
+class endPage(tk.Frame):
+        """"""
 
 quiz = rootFrame()
 quiz.geometry("500x300")
