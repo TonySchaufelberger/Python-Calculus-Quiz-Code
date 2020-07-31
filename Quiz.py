@@ -43,19 +43,19 @@ class quit_popup(ok_popup):
                 button.pack()
                 button2.pack()
 
-        def yes_function(self):
-                pass
-
-class cancel_popup(quit_popup):
+class restart_popup(ok_popup):
         """A child of the quit_popup, inherits the same buttons but adds new functionality for the first button
-        Yes: yes_function
+        Yes: restarts the quiz
         No: closes the popup"""
-        def __init__(self, msg, parent, func):
-                self.func = func
-                super().__init(msg, parent)
+        def __init__(self, msg, parent):
+                self.parent = parent
+                super().__init__(msg)
 
-        def yes_function(self):
-                pass
+        def buttons(self, msg):
+                button = ttk.Button(self.popup_box, text="Yes", command=self.parent.restart)
+                button2 = ttk.Button(self.popup_box, text="No", command=self.popup_box.destroy)
+                button.pack()
+                button2.pack()
 
 
 class rootFrame(tk.Tk):
@@ -123,7 +123,6 @@ class rootFrame(tk.Tk):
                                 difficulty = "hard"
                         random.shuffle(question_lists[0][i][difficulty])
                         new_list[difficulty] += [question_lists[0][i][difficulty][0]]
-                        del question_lists[0][i][difficulty][0]
 
                         frame = questionPage(self.container, self, question, length, new_list[difficulty])
                         self.frames["questionPage" + str(question)] = frame
@@ -144,6 +143,16 @@ class rootFrame(tk.Tk):
                         sections += [integration_questions]
                 return sections
 
+        def restart(self):
+                self.score.set(0)
+                i = len(self.frames) - 4
+                while i > 0:
+                        j = "questionPage" + str(i)
+                        if j[0:12] == "questionPage":
+                                del self.frames[j]
+                        i = i - 1
+                self.show_frame(startingPage)
+
 class startingPage(tk.Frame):
         """This page contains a next button to the selection page"""
         def __init__(self, parent, controller):
@@ -154,7 +163,7 @@ class startingPage(tk.Frame):
                 button = ttk.Button(self, text="Next", command=lambda: controller.show_frame(selectionPage))
                 button.grid(row=0,column=1)
 
-                popup_button = ttk.Button(self, text="popup", command=lambda: quit_popup("close", controller))
+                popup_button = ttk.Button(self, text="popup", command=lambda: restart_popup("close", controller))
                 popup_button.grid(row=0,column=2)
 
 class selectionPage(tk.Frame):
@@ -214,6 +223,9 @@ class questionPage(tk.Frame):
                 answers_correct = ttk.Label(self, textvariable=controller.score)
                 answers_correct.pack()
 
+                popup_button = ttk.Button(self, text="popup", command=lambda: restart_popup("close", controller))
+                popup_button.pack()
+
 class endPage(tk.Frame):
         """"""
         def __init__(self, parent, controller):
@@ -223,6 +235,9 @@ class endPage(tk.Frame):
 
                 answers_correct = ttk.Label(self, textvariable=controller.score)
                 answers_correct.pack()
+                
+                button = ttk.Button(self, text="restart Quiz", command=lambda: controller.restart())
+                button.pack()
 
 quiz = rootFrame()
 quiz.geometry("500x300")
