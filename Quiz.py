@@ -85,7 +85,7 @@ class rootFrame(tk.Tk):
 
                 self.frames = {}
 
-                for f in (startingPage, selectionPage):
+                for f in (startingPage, selectionPage, endPage):
                         frame = f(self.container, self)
                         self.frames[f] = frame
                         frame.grid(row=0, column=0, sticky="nsew")
@@ -125,7 +125,7 @@ class rootFrame(tk.Tk):
                         new_list[difficulty] += [question_lists[0][i][difficulty][0]]
                         del question_lists[0][i][difficulty][0]
 
-                        frame = questionPage(self.container, self, question, new_list[difficulty])
+                        frame = questionPage(self.container, self, question, length, new_list[difficulty])
                         self.frames["questionPage" + str(question)] = frame
                         frame.grid(row=0, column=0, sticky="nsew")
 
@@ -185,7 +185,7 @@ class questionPage(tk.Frame):
         There will always be multiple instances of this object
         For each instance of a questionPage, the number increments by one, which takes the next question in the question_list
         This question_list is generated based on the checkboxes the user checked before"""
-        def __init__(self, parent, controller, number, question_list):
+        def __init__(self, parent, controller, number, end_number, question_list):
                 tk.Frame.__init__(self, parent)
                 self.question_list = question_list
                 text = "A question" + str(number+1)
@@ -197,11 +197,16 @@ class questionPage(tk.Frame):
                 question = ttk.Label(self, text=self.question_list[0]['question'])
                 question.pack()
 
-                answer = {}
+                if number == end_number - 1:
+                        next_page = endPage
+                else:
+                        next_page = "questionPage" + str(number+1)
+
                 """The for loop here generates buttons of each answer. Each button has the command to check if it was right, and then move to the next frame.
                 I've put this into a for loop to make it easier to program"""
+                answer = {}
                 for letter in ['a','b','c','d']:
-                        answer[letter] = ttk.Button(self, text=self.question_list[0]['answers'][letter], command=lambda letter=letter, correct_letter=self.question_list[0]["correct_answer"]: combine_funcs(controller.check_answer(letter, correct_letter), controller.show_frame("questionPage" + str(number+1))))
+                        answer[letter] = ttk.Button(self, text=self.question_list[0]['answers'][letter], command=lambda letter=letter, correct_letter=self.question_list[0]["correct_answer"], next_page=next_page: combine_funcs(controller.check_answer(letter, correct_letter), controller.show_frame(next_page)))
                         answer[letter].pack()
                 
                 del self.question_list[0]
@@ -211,6 +216,13 @@ class questionPage(tk.Frame):
 
 class endPage(tk.Frame):
         """"""
+        def __init__(self, parent, controller):
+                tk.Frame.__init__(self, parent)
+                label = ttk.Label(self, text="End score", font=LARGE_FONT)
+                label.pack(pady=10,padx=10)
+
+                answers_correct = ttk.Label(self, textvariable=controller.score)
+                answers_correct.pack()
 
 quiz = rootFrame()
 quiz.geometry("500x300")
