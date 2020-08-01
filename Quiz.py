@@ -99,20 +99,31 @@ class rootFrame(tk.Tk):
         def generate_quiz(self, *question_lists):
                 """This method is the same as the for loop in the __init__, except it passes each question as its own instance
                 It takes from a quesiton_list generated from the types of question chosen by the user"""
-                length = len(question_lists[0])*10
-                new_list = {"easy": [], "medium": [], "hard": []}
-                section_length = 10
+                length, section_length = len(question_lists[0])*10, 10
+                new_list = [{"easy": [], "medium": [], "hard": []}, {"easy": [], "medium": [], "hard": []}, {"easy": [], "medium": [], "hard": []}]
                 modifier = 1
+                # The question_i variable is reset when there is a change in difficulty
+                question_i = 0
+                difficulty, difficulty_before = "easy", ""
                 for question in range(length):
+
+                        difficulty_before = difficulty
+
+                        """The 'i' variable is used to determine which question list the question is taken from.
+                        When sections are off, it's random. When they are on, it is in order."""
                         if self.section_check.get() == True:
                                 modifier = math.floor(question / 10)
                                 i = modifier
-                                easy_length = 3
-                                medium_length = 7
+                                # The i_2 here selects the corresponding question type with the new list
+                                i_2 = i
+                                # The difficulty lengths are the same across 10 questions
+                                easy_length, medium_length = 3, 7
                         else:
                                 i = random.randint(0,len(question_lists[0])-1)
-                                easy_length = (length / 3)
-                                medium_length = (3 * length / 4)
+                                # Because the question types are random, it only uses it within the same dictionary in the list
+                                i_2 = 0
+                                # Difficulty lengths adjust depending on the quiz length
+                                easy_length, medium_length = (length / 3), (3 * length / 4)
                                 section_length = 0
                                         
                         if question <= modifier * section_length + easy_length:
@@ -121,12 +132,27 @@ class rootFrame(tk.Tk):
                                 difficulty = "medium"
                         else:
                                 difficulty = "hard"
-                        random.shuffle(question_lists[0][i][difficulty])
-                        new_list[difficulty] += [question_lists[0][i][difficulty][0]]
 
-                        frame = questionPage(self.container, self, question, length, new_list[difficulty])
+                        # If there is a change in difficulty, reset question_i so that the question can properly index it
+                        if difficulty_before != difficulty:
+                                question_i = 0
+
+                        random.shuffle(question_lists[0][i][difficulty])
+                        # Checks to see if there is a duplicate, duplicate = shuffle again
+                        while question_lists[0][i][difficulty][0] in new_list[i_2][difficulty]:
+                                random.shuffle(question_lists[0][i][difficulty])
+                        
+                        new_list[i_2][difficulty] += [question_lists[0][i][difficulty][0]]
+                        
+                        if self.section_check.get() == False:
+                                # When there are no sections, disable question_i functionality
+                                question_i = len(new_list[i_2][difficulty]) - 1
+
+                        frame = questionPage(self.container, self, question, question_i, length, new_list[i_2][difficulty])
                         self.frames["questionPage" + str(question)] = frame
                         frame.grid(row=0, column=0, sticky="nsew")
+
+                        question_i += 1
 
         def check_answer(self, answer, correct_answer):
                 """Checks if the answer selected by a button is correct"""
@@ -194,7 +220,7 @@ class questionPage(tk.Frame):
         There will always be multiple instances of this object
         For each instance of a questionPage, the number increments by one, which takes the next question in the question_list
         This question_list is generated based on the checkboxes the user checked before"""
-        def __init__(self, parent, controller, number, end_number, question_list):
+        def __init__(self, parent, controller, number, question_i, end_number, question_list):
                 tk.Frame.__init__(self, parent)
                 self.question_list = question_list
                 text = "A question" + str(number+1)
@@ -203,7 +229,7 @@ class questionPage(tk.Frame):
 
                 """Essentially, each question is index 0 of the shuffled list. At the end, this index is deleted, so that old index 1 becomes index 0.
                 This way, no question is repeated."""
-                question = ttk.Label(self, text=self.question_list[0]['question'])
+                question = ttk.Label(self, text=self.question_list[question_i]['question'])
                 question.pack()
 
                 if number == end_number - 1:
@@ -215,10 +241,8 @@ class questionPage(tk.Frame):
                 I've put this into a for loop to make it easier to program"""
                 answer = {}
                 for letter in ['a','b','c','d']:
-                        answer[letter] = ttk.Button(self, text=self.question_list[0]['answers'][letter], command=lambda letter=letter, correct_letter=self.question_list[0]["correct_answer"], next_page=next_page: combine_funcs(controller.check_answer(letter, correct_letter), controller.show_frame(next_page)))
+                        answer[letter] = ttk.Button(self, text=self.question_list[question_i]['answers'][letter], command=lambda letter=letter, correct_letter=self.question_list[question_i]["correct_answer"], next_page=next_page: combine_funcs(controller.check_answer(letter, correct_letter), controller.show_frame(next_page)))
                         answer[letter].pack()
-                
-                del self.question_list[0]
 
                 answers_correct = ttk.Label(self, textvariable=controller.score)
                 answers_correct.pack()
