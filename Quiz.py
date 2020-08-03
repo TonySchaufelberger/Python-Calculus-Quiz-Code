@@ -84,10 +84,17 @@ class RootFrame(tk.Tk):
                         self.frames["QuestionPage" + str(question)] = frame
                         frame.grid(row=0, column=0, sticky="nsew")
 
-        def check_answer(self, answer, correct_answer):
+        def check_answer(self, answer, correct_answer, page):
                 """Checks if the answer selected by a button is correct"""
                 if answer == correct_answer:
-                        self.score.set(self.score.get()+1)
+                        page.correct = 1
+                else:
+                        page.correct = 0
+
+        def check_score(self):
+                for i in self.frames:
+                        if isinstance(i, str):
+                                self.score.set(self.score.get()+self.frames[i].correct)
 
         def check_section(self):
                 sections = []
@@ -161,6 +168,8 @@ class QuestionPage(tk.Frame):
                 label = ttk.Label(self, text=text, font=LARGE_FONT)
                 label.pack(pady=10,padx=10)
 
+                self.correct = 0
+
                 """Essentially, each question is index 0 of the shuffled list. At the end, this index is deleted, so that old index 1 becomes index 0.
                 This way, no question is repeated."""
                 question = ttk.Label(self, text=self.question_list[0]['question'])
@@ -175,13 +184,13 @@ class QuestionPage(tk.Frame):
                 I've put this into a for loop to make it easier to program"""
                 answer = {}
                 for letter in ['a','b','c','d']:
-                        answer[letter] = ttk.Button(self, text=self.question_list[0]['answers'][letter], command=lambda letter=letter, correct_letter=self.question_list[0]["correct_answer"], next_page=next_page: combine_funcs(controller.check_answer(letter, correct_letter), controller.show_frame(next_page)))
+                        answer[letter] = ttk.Button(self, text=self.question_list[0]['answers'][letter], command=lambda letter=letter, correct_letter=self.question_list[0]["correct_answer"], next_page=next_page: combine_funcs(controller.check_answer(letter, correct_letter, self), controller.show_frame(next_page)))
                         answer[letter].pack()
                 
                 del self.question_list[0]
 
-                answers_correct = ttk.Label(self, textvariable=controller.score)
-                answers_correct.pack()
+                back_button = ttk.Button(self, text="Back", command=lambda: controller.show_frame("QuestionPage" + str(number-1)))
+                back_button.pack()
 
                 popup_button = ttk.Button(self, text="Restart", command=lambda: controller.restart(tk.messagebox.askyesno(self, message="Restart?")))
                 popup_button.pack()
@@ -196,7 +205,10 @@ class EndPage(tk.Frame):
                 answers_correct = ttk.Label(self, textvariable=controller.score)
                 answers_correct.pack()
                 
-                button = ttk.Button(self, text="restart Quiz", command=lambda: controller.restart())
+                button2 = ttk.Button(self, text="get score", command=lambda: controller.check_score())
+                button2.pack()
+                
+                button = ttk.Button(self, text="Restart quiz", command=lambda: controller.restart(tk.messagebox.askyesno(self, message="Restart?")))
                 button.pack()
 
 quiz = RootFrame()
