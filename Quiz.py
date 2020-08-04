@@ -14,6 +14,14 @@ def combine_funcs(*funcs):
                         f(*args, **kwargs)
         return combined_func
 
+class UserData():
+        """"""
+
+        def __init__(self, name, score=0, grade="NA"):
+                self.name = name
+                self.score = score
+                self.grade = grade
+
 class RootFrame(tk.Tk):
         """The frame that stores all important information, and is parent to all other frames
         The show_frame method raises the selected frame to the top
@@ -24,7 +32,19 @@ class RootFrame(tk.Tk):
                 tk.Tk.iconbitmap(self, default="")
                 tk.Tk.wm_title(self, "Level 3 Calculus Revision Quiz")
 
-                # I've converted container to self.container so I can access it in a different method, hopefully I will find a way to revert it
+                topbar = tk.Frame(self)
+                topbar.pack(side="top", fill="both", expand=True)
+                
+                menubar = tk.Menu(self)
+                menubar.add_command(label="Test")
+                
+                scoremenu = tk.Menu(menubar, tearoff=0)
+                scoremenu.add_command(label="Scores")
+                menubar.add_cascade(label="Scoreboards", menu=scoremenu)
+                
+                self.config(menu=menubar)
+
+                # I've converted container to self.container so I can access it in a different method
                 self.container = tk.Frame(self)
                 self.container.pack(side="top", fill="both", expand=True)
                 self.container.grid_rowconfigure(0, weight=1)
@@ -38,6 +58,9 @@ class RootFrame(tk.Tk):
                 self.section_check = tk.BooleanVar(self)
                 
                 self.score = tk.IntVar(self, 0)
+
+                self.users = {}
+                self.current_user = ""
 
                 self.frames = {}
 
@@ -126,9 +149,12 @@ class RootFrame(tk.Tk):
                         page.correct = 0
 
         def check_score(self):
+                current_score = 0
                 for i in self.frames:
                         if isinstance(i, str):
-                                self.score.set(self.score.get()+self.frames[i].correct)
+                                current_score += self.score.get()+self.frames[i].correct
+                self.users[self.current_user].score = current_score
+                print(self.users[self.current_user].score)
 
         def check_section(self):
                 sections = []
@@ -148,7 +174,11 @@ class RootFrame(tk.Tk):
                                 j = "QuestionPage" + str(i)
                                 del self.frames[j]
                                 i = i - 1
-                        self.show_frame(StartingPage)
+                        self.show_frame(SelectionPage)
+
+        def new_user(self, value):
+                self.restart(value)
+                self.show_frame(StartingPage)
         
         def quit(self, value):
                 if value:
@@ -161,7 +191,16 @@ class StartingPage(tk.Frame):
                 label = ttk.Label(self, text="This is the start page", font=LARGE_FONT)
                 label.pack()
 
-                next_button = ttk.Button(self, text="Next", command=lambda: controller.show_frame(SelectionPage))
+                name = tk.StringVar(controller)
+
+                entry = ttk.Entry(self, textvariable=name)
+                entry.pack()
+
+                def save_name(saved_name):
+                        controller.current_user = saved_name
+                        controller.users[saved_name] = UserData(saved_name)
+
+                next_button = ttk.Button(self, text="Next", command=lambda: combine_funcs(save_name(name.get()), controller.show_frame(SelectionPage)))
                 next_button.pack()
 
                 button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno(self, message="Quit?")))
@@ -197,6 +236,7 @@ class QuestionPage(tk.Frame):
         This question_list is generated based on the checkboxes the user checked before"""
         def __init__(self, parent, controller, number, question_i, end_number, question_list):
                 tk.Frame.__init__(self, parent)
+                print(controller.users[controller.current_user].score)
                 self.question_list = question_list
                 text = "A question" + str(number+1)
                 label = ttk.Label(self, text=text, font=LARGE_FONT)
@@ -243,7 +283,7 @@ class EndPage(tk.Frame):
                 button2 = ttk.Button(self, text="get score", command=lambda: controller.check_score())
                 button2.pack()
                 
-                button = ttk.Button(self, text="Restart quiz", command=lambda: controller.restart(tk.messagebox.askyesno(self, message="Restart?")))
+                button = ttk.Button(self, text="New quiz", command=lambda: controller.new_user(tk.messagebox.askyesno(self, message="Start again?")))
                 button.pack()
 
                 button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno(self, message="Quit?")))
