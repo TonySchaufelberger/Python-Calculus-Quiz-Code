@@ -110,6 +110,13 @@ class RootFrame(tk.Tk):
 
                         question_i += 1
 
+        def start_quiz(self):
+                section_list = self.check_section()
+                if section_list == []:
+                        tk.messagebox.showwarning(self, message="Please select a question type.")
+                else:
+                        self.generate_quiz(section_list)
+                        self.show_frame("QuestionPage0")
 
         def check_answer(self, answer, correct_answer, page):
                 """Checks if the answer selected by a button is correct"""
@@ -180,7 +187,7 @@ class SelectionPage(tk.Frame):
                 section_check_on.pack()
                 section_check_off.pack()
 
-                button = ttk.Button(self, text="Start Quiz", command=lambda: combine_funcs(controller.generate_quiz(controller.check_section()), controller.show_frame("QuestionPage0")))
+                button = ttk.Button(self, text="Start Quiz", command=lambda: controller.start_quiz())
                 button.pack()
 
 class QuestionPage(tk.Frame):
@@ -220,6 +227,9 @@ class QuestionPage(tk.Frame):
                 popup_button = ttk.Button(self, text="Restart", command=lambda: controller.restart(tk.messagebox.askyesno(self, message="Restart?")))
                 popup_button.pack()
 
+                button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno(self, message="Quit?")))
+                button.pack()
+
 class EndPage(tk.Frame):
         """"""
         def __init__(self, parent, controller):
@@ -234,6 +244,9 @@ class EndPage(tk.Frame):
                 button2.pack()
                 
                 button = ttk.Button(self, text="Restart quiz", command=lambda: controller.restart(tk.messagebox.askyesno(self, message="Restart?")))
+                button.pack()
+
+                button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno(self, message="Quit?")))
                 button.pack()
 
 quiz = RootFrame()
