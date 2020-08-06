@@ -17,10 +17,11 @@ def combine_funcs(*funcs):
 class UserData():
         """"""
 
-        def __init__(self, name, score=0, grade="NA"):
+        def __init__(self, name, score=0, grade="NA", sections=""):
                 self.name = name
                 self.score = score
                 self.grade = grade
+                self.sections = sections
 
 class RootFrame(tk.Tk):
         """The frame that stores all important information, and is parent to all other frames
@@ -37,11 +38,9 @@ class RootFrame(tk.Tk):
                 
                 menubar = tk.Menu(self)
                 menubar.add_command(label="Test")
-                
                 scoremenu = tk.Menu(menubar, tearoff=0)
-                scoremenu.add_command(label="Scores")
+                scoremenu.add_command(label="Scores", command=lambda: self.score_popup())
                 menubar.add_cascade(label="Scoreboards", menu=scoremenu)
-                
                 self.config(menu=menubar)
 
                 # I've converted container to self.container so I can access it in a different method
@@ -54,11 +53,9 @@ class RootFrame(tk.Tk):
                 self.complex_test = tk.BooleanVar(self)
                 self.differentiation_test = tk.BooleanVar(self)
                 self.integration_test = tk.BooleanVar(self)
-
                 self.section_check = tk.BooleanVar(self)
-                
-                self.score = tk.IntVar(self, 0)
 
+                self.score = tk.IntVar(self, 0)
                 self.users = {}
                 self.current_user = ""
 
@@ -74,6 +71,27 @@ class RootFrame(tk.Tk):
         def show_frame(self, cont):
                 frame = self.frames[cont]
                 frame.tkraise()
+
+        def score_popup(self):
+                popup_box = tk.Tk()
+                i = 0
+                for user in self.users:
+                        user_name = tk.StringVar(popup_box)
+                        user_name.set(self.users[user].name)
+                        user_score = tk.IntVar(popup_box)
+                        user_score.set(self.users[user].score)
+                        user_sections = tk.StringVar(popup_box)
+                        user_sections.set(self.users[user].sections)
+                        
+                        name_label = ttk.Label(popup_box, text=user_name.get())
+                        name_label.grid(row=i, column=0)
+                        score_label = ttk.Label(popup_box, text=user_score.get())
+                        score_label.grid(row=i, column=1)
+                        sections_label = ttk.Label(popup_box, text=user_sections.get())
+                        sections_label.grid(row=i, column=3)
+                        
+                        i += 1
+                popup_box.mainloop()
 
         def generate_quiz(self, *question_lists):
                 """This method is the same as the for loop in the __init__, except it passes each question as its own instance
@@ -158,12 +176,17 @@ class RootFrame(tk.Tk):
 
         def check_section(self):
                 sections = []
+                complex_numbers, differentiation, integration = "", "", ""
                 if self.complex_test.get() == True:
                         sections += [complex_questions]
+                        complex_numbers = "Complex Numbers"
                 if self.differentiation_test.get() == True:
                         sections += [differentiation_questions]
+                        differentiation = "Differentiation"
                 if self.integration_test.get() == True:
                         sections += [integration_questions]
+                        integration = "Integration"
+                self.users[self.current_user].sections = ", ".join([complex_numbers, differentiation, integration])
                 return sections
 
         def restart(self, value):
@@ -175,10 +198,11 @@ class RootFrame(tk.Tk):
                                 del self.frames[j]
                                 i = i - 1
                         self.show_frame(SelectionPage)
+                        return True
 
         def new_user(self, value):
-                self.restart(value)
-                self.show_frame(StartingPage)
+                if self.restart(value):
+                        self.show_frame(StartingPage)
         
         def quit(self, value):
                 if value:
@@ -202,7 +226,6 @@ class StartingPage(tk.Frame):
 
                 next_button = ttk.Button(self, text="Next", command=lambda: combine_funcs(save_name(name.get()), controller.show_frame(SelectionPage)))
                 next_button.pack()
-
                 button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno(self, message="Quit?")))
                 button.pack()
 
@@ -220,7 +243,6 @@ class SelectionPage(tk.Frame):
                 complex_check.pack()
                 differentiation_check.pack()
                 integration_check.pack()
-
                 section_check_on = ttk.Radiobutton(self, text="Sections On", variable=controller.section_check, value=True)
                 section_check_off = ttk.Radiobutton(self, text="Sections Off", variable=controller.section_check, value=False)
                 section_check_on.pack()
@@ -263,10 +285,10 @@ class QuestionPage(tk.Frame):
 
                 back_button = ttk.Button(self, text="Back", command=lambda: controller.show_frame("QuestionPage" + str(number-1)))
                 back_button.pack()
-
+                skip_button = ttk.Button(self, text="Skip", command=lambda next_page=next_page: combine_funcs(controller.check_answer(1, 0, self), controller.show_frame(next_page)))
+                skip_button.pack()
                 popup_button = ttk.Button(self, text="Restart", command=lambda: controller.restart(tk.messagebox.askyesno(self, message="Restart?")))
                 popup_button.pack()
-
                 button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno(self, message="Quit?")))
                 button.pack()
 
@@ -279,13 +301,10 @@ class EndPage(tk.Frame):
 
                 answers_correct = ttk.Label(self, textvariable=controller.score)
                 answers_correct.pack()
-                
                 button2 = ttk.Button(self, text="get score", command=lambda: controller.check_score())
-                button2.pack()
-                
+                button2.pack()                
                 button = ttk.Button(self, text="New quiz", command=lambda: controller.new_user(tk.messagebox.askyesno(self, message="Start again?")))
                 button.pack()
-
                 button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno(self, message="Quit?")))
                 button.pack()
 
