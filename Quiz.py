@@ -1,9 +1,7 @@
 from variables import *
-import math
-import random
+import math, random, sqlite3
 import tkinter as tk
-from tkinter import simpledialog
-from tkinter import ttk
+from tkinter import simpledialog, ttk
 
 LARGE_FONT = ("Verdana", 12)
 
@@ -22,6 +20,11 @@ class UserData():
                 self.score = score
                 self.grade = grade
                 self.sections = sections
+
+        def user_write(self):
+                with open("user_data.txt", "a") as file:
+                        file.write("{}".format([self.name, self.score, self.grade, self.sections]))
+                print("test")
 
 class RootFrame(tk.Tk):
         """The frame that stores all important information, and is parent to all other frames
@@ -202,6 +205,10 @@ class RootFrame(tk.Tk):
 
         def new_user(self, value):
                 if self.restart(value):
+                        self.users[self.current_user].user_write()
+                        with open("user_data.txt") as file:
+                                read = file.readlines()
+                        print(read)
                         self.show_frame(StartingPage)
         
         def quit(self, value):
