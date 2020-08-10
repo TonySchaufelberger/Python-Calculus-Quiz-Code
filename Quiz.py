@@ -1,5 +1,5 @@
 from variables import *
-import math, random, sqlite3
+import math, random, json
 import tkinter as tk
 from tkinter import simpledialog, ttk
 
@@ -22,9 +22,11 @@ class UserData():
                 self.sections = sections
 
         def user_write(self):
-                with open("user_data.txt", "a") as file:
-                        file.write("{}".format([self.name, self.score, self.grade, self.sections]))
-                print("test")
+                with open("user_data.json", "r+") as json_file:
+                        dic = json.load(json_file)
+                        user_data = {{"name": self.name, "score": self.score, "grade": self.grade, "sections": self.sections}}
+                        dic.update(user_data)
+                        json.dump(dic, json_file)
 
 class RootFrame(tk.Tk):
         """The frame that stores all important information, and is parent to all other frames
@@ -206,9 +208,9 @@ class RootFrame(tk.Tk):
         def new_user(self, value):
                 if self.restart(value):
                         self.users[self.current_user].user_write()
-                        with open("user_data.txt") as file:
-                                read = file.readlines()
-                        print(read)
+                        with open ("user_data.json") as file:
+                                data = json.load(file)
+                                print(data['users'])
                         self.show_frame(StartingPage)
         
         def quit(self, value):
