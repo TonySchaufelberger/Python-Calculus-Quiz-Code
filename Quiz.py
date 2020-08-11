@@ -24,9 +24,10 @@ class UserData():
         def user_write(self):
                 with open("user_data.json", "r+") as json_file:
                         dic = json.load(json_file)
-                        user_data = {{"name": self.name, "score": self.score, "grade": self.grade, "sections": self.sections}}
-                        dic.update(user_data)
-                        json.dump(dic, json_file)
+                        user_data = {self.name: {"name": self.name, "score": self.score, "grade": self.grade, "sections": self.sections}}
+                        dic["users"].update(user_data)
+                        json_file.seek(0)
+                        json.dump(dic, json_file, indent=4)
 
 class RootFrame(tk.Tk):
         """The frame that stores all important information, and is parent to all other frames
@@ -80,22 +81,25 @@ class RootFrame(tk.Tk):
         def score_popup(self):
                 popup_box = tk.Tk()
                 i = 0
-                for user in self.users:
-                        user_name = tk.StringVar(popup_box)
-                        user_name.set(self.users[user].name)
-                        user_score = tk.IntVar(popup_box)
-                        user_score.set(self.users[user].score)
-                        user_sections = tk.StringVar(popup_box)
-                        user_sections.set(self.users[user].sections)
+                with open("user_data.json", "r") as json_file:
+                        data = json.load(json_file)
+                        users = data['users']
+                        for user in data['users']:
+                                user_name = tk.StringVar(popup_box)
+                                user_name.set(users[user]['name'])
+                                user_score = tk.IntVar(popup_box)
+                                user_score.set(users[user]['score'])
+                                user_sections = tk.StringVar(popup_box)
+                                user_sections.set(users[user]['sections'])
                         
-                        name_label = ttk.Label(popup_box, text=user_name.get())
-                        name_label.grid(row=i, column=0)
-                        score_label = ttk.Label(popup_box, text=user_score.get())
-                        score_label.grid(row=i, column=1)
-                        sections_label = ttk.Label(popup_box, text=user_sections.get())
-                        sections_label.grid(row=i, column=3)
+                                name_label = ttk.Label(popup_box, text=user_name.get())
+                                name_label.grid(row=i, column=0)
+                                score_label = ttk.Label(popup_box, text=user_score.get())
+                                score_label.grid(row=i, column=1)
+                                sections_label = ttk.Label(popup_box, text=user_sections.get())
+                                sections_label.grid(row=i, column=3)
                         
-                        i += 1
+                                i += 1
                 popup_box.mainloop()
 
         def generate_quiz(self, *question_lists):
@@ -208,9 +212,6 @@ class RootFrame(tk.Tk):
         def new_user(self, value):
                 if self.restart(value):
                         self.users[self.current_user].user_write()
-                        with open ("user_data.json") as file:
-                                data = json.load(file)
-                                print(data['users'])
                         self.show_frame(StartingPage)
         
         def quit(self, value):
