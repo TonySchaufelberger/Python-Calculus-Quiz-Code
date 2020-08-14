@@ -15,16 +15,25 @@ def combine_funcs(*funcs):
 class UserData():
         """"""
 
-        def __init__(self, name, score=0, grade="NA", sections=""):
+        def __init__(self, name, score=0, grade="Not Achieved", sections=["Not attempted"]):
                 self.name = name
                 self.score = score
                 self.grade = grade
                 self.sections = sections
 
         def user_write(self):
+                if self.score < (0.2 * len(self.sections) * 20) or self.score == 0:
+                        self.grade = "Not Achieved"
+                elif self.score < (0.4 * len(self.sections) * 20):
+                        self.grade = "Achieved"
+                elif self.score < (0.8 * len(self.sections) * 20):
+                        self.grade = "Merit"
+                else:
+                        self.grade = "Excellence"
+
                 with open("user_data.json", "r+") as json_file:
                         dic = json.load(json_file)
-                        user_data = {self.name: {"name": self.name, "score": self.score, "grade": self.grade, "sections": self.sections}}
+                        user_data = {self.name: {"name": self.name, "score": self.score, "grade": self.grade, "sections": ", ".join(self.sections)}}
                         dic["users"].update(user_data)
                         json_file.seek(0)
                         json.dump(dic, json_file, indent=4)
@@ -43,7 +52,9 @@ class RootFrame(tk.Tk):
                 topbar.pack(side="top", fill="both", expand=True)
                 
                 menubar = tk.Menu(self)
-                menubar.add_command(label="Test")
+                filemenu = tk.Menu(menubar, tearoff=0)
+                filemenu.add_command(label="New User", command=lambda: self.new_user(tk.messagebox.askyesno(self, message="New User?")))
+                menubar.add_cascade(label="File", menu=filemenu)
                 scoremenu = tk.Menu(menubar, tearoff=0)
                 scoremenu.add_command(label="Scores", command=lambda: self.score_popup())
                 menubar.add_cascade(label="Scoreboards", menu=scoremenu)
@@ -80,8 +91,22 @@ class RootFrame(tk.Tk):
 
         def score_popup(self):
                 popup_box = tk.Tk()
+                popup_box.geometry("500x300")
+
+                def remove_user(data, dictionary, user, json_file, value):
+                        if value:
+                                json_file.close()
+                                with open("user_data.json", "w") as json_file_write:
+                                        new_dictionary = {i:dictionary[i] for i in dictionary if i!=user}
+                                        json_file_write.seek(0)
+                                        new_data = {'users': new_dictionary}
+                                        json.dump(new_data, json_file_write, indent=4)
+                                        json_file_write.close()
+                                popup_box.destroy()
+                                self.score_popup()
+
                 i = 0
-                with open("user_data.json", "r") as json_file:
+                with open("user_data.json", "r+") as json_file:
                         data = json.load(json_file)
                         users = data['users']
                         for user in data['users']:
@@ -89,15 +114,22 @@ class RootFrame(tk.Tk):
                                 user_name.set(users[user]['name'])
                                 user_score = tk.IntVar(popup_box)
                                 user_score.set(users[user]['score'])
+                                user_grade = tk.StringVar(popup_box)
+                                user_grade.set(users[user]['grade'])
                                 user_sections = tk.StringVar(popup_box)
                                 user_sections.set(users[user]['sections'])
+
+                                delete_user = ttk.Button(popup_box, text="Remove User", command=lambda: remove_user(data, users, user, json_file, tk.messagebox.askyesno(self, message="Remove User?")))
                         
                                 name_label = ttk.Label(popup_box, text=user_name.get())
                                 name_label.grid(row=i, column=0)
                                 score_label = ttk.Label(popup_box, text=user_score.get())
                                 score_label.grid(row=i, column=1)
+                                grade_label = ttk.Label(popup_box, text=user_grade.get())
+                                grade_label.grid(row=i, column=2)
                                 sections_label = ttk.Label(popup_box, text=user_sections.get())
                                 sections_label.grid(row=i, column=3)
+                                delete_user.grid(row=i, column=4)
                         
                                 i += 1
                 popup_box.mainloop()
@@ -134,10 +166,13 @@ class RootFrame(tk.Tk):
                                         
                         if question <= modifier * section_length + easy_length:
                                 difficulty = "easy"
+                                score_modifier = 1
                         elif question <= modifier * section_length + medium_length:
                                 difficulty = "medium"
+                                score_modifier = 2
                         else:
                                 difficulty = "hard"
+                                score_modifier = 3
 
                         # If there is a change in difficulty, reset question_i so that the question can properly index it
                         if difficulty_before != difficulty:
@@ -154,7 +189,7 @@ class RootFrame(tk.Tk):
                                 # When there are no sections, disable question_i functionality
                                 question_i = len(new_list[i_2][difficulty]) - 1
 
-                        frame = QuestionPage(self.container, self, question, question_i, length, new_list[i_2][difficulty])
+                        frame = QuestionPage(self.container, self, question, question_i, score_modifier, length, new_list[i_2][difficulty])
                         self.frames["QuestionPage" + str(question)] = frame
                         frame.grid(row=0, column=0, sticky="nsew")
 
@@ -168,10 +203,10 @@ class RootFrame(tk.Tk):
                         self.generate_quiz(section_list)
                         self.show_frame("QuestionPage0")
 
-        def check_answer(self, answer, correct_answer, page):
+        def check_answer(self, answer, correct_answer, score_modifier, page):
                 """Checks if the answer selected by a button is correct"""
                 if answer == correct_answer:
-                        page.correct = 1
+                        page.correct = 1 * score_modifier
                 else:
                         page.correct = 0
 
@@ -185,7 +220,7 @@ class RootFrame(tk.Tk):
 
         def check_section(self):
                 sections = []
-                complex_numbers, differentiation, integration = "", "", ""
+                complex_numbers, differentiation, integration = None, None, None
                 if self.complex_test.get() == True:
                         sections += [complex_questions]
                         complex_numbers = "Complex Numbers"
@@ -195,7 +230,7 @@ class RootFrame(tk.Tk):
                 if self.integration_test.get() == True:
                         sections += [integration_questions]
                         integration = "Integration"
-                self.users[self.current_user].sections = ", ".join([complex_numbers, differentiation, integration])
+                self.users[self.current_user].sections = [section for section in [complex_numbers, differentiation, integration] if isinstance(section, str)]
                 return sections
 
         def restart(self, value):
@@ -266,9 +301,8 @@ class QuestionPage(tk.Frame):
         There will always be multiple instances of this object
         For each instance of a QuestionPage, the number increments by one, which takes the next question in the question_list
         This question_list is generated based on the checkboxes the user checked before"""
-        def __init__(self, parent, controller, number, question_i, end_number, question_list):
+        def __init__(self, parent, controller, number, question_i, score_modifier, end_number, question_list):
                 tk.Frame.__init__(self, parent)
-                print(controller.users[controller.current_user].score)
                 self.question_list = question_list
                 text = "A question" + str(number+1)
                 label = ttk.Label(self, text=text, font=LARGE_FONT)
@@ -290,7 +324,7 @@ class QuestionPage(tk.Frame):
                 I've put this into a for loop to make it easier to program"""
                 answer = {}
                 for letter in ['a','b','c','d']:
-                        answer[letter] = ttk.Button(self, text=self.question_list[question_i]['answers'][letter], command=lambda letter=letter, correct_letter=self.question_list[question_i]["correct_answer"], next_page=next_page: combine_funcs(controller.check_answer(letter, correct_letter, self), controller.show_frame(next_page)))
+                        answer[letter] = ttk.Button(self, text=self.question_list[question_i]['answers'][letter], command=lambda letter=letter, correct_letter=self.question_list[question_i]["correct_answer"], next_page=next_page: combine_funcs(controller.check_answer(letter, correct_letter, score_modifier, self), controller.show_frame(next_page)))
                         answer[letter].pack()
 
                 back_button = ttk.Button(self, text="Back", command=lambda: controller.show_frame("QuestionPage" + str(number-1)))
