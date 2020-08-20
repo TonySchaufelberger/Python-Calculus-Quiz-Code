@@ -25,17 +25,15 @@ class UserData():
                 self.question = 0
 
         def user_write(self):
-                if self.score < (0.2 * len(self.sections) * 20) or self.score == 0:
-                        self.grade = "Not Achieved"
-                elif self.score < (0.4 * len(self.sections) * 20):
-                        self.grade = "Achieved"
-                elif self.score < (0.8 * len(self.sections) * 20):
-                        self.grade = "Merit"
-                else:
-                        self.grade = "Excellence"
-
                 with open("user_data.json", "r+") as json_file:
                         dic = json.load(json_file)
+                        i = 2
+                        original_name = self.name
+                        while original_name in dic["users"]:
+                                original_name = self.name
+                                original_name = "{}({})".format(self.name, i)
+                                i += 1
+                        self.name = original_name
                         user_data = {self.name: {"name": self.name, "score": self.score, "grade": self.grade, "sections": ", ".join(self.sections)}}
                         dic["users"].update(user_data)
                         json_file.seek(0)
@@ -74,11 +72,10 @@ class RootFrame(tk.Tk):
                 self.differentiation_test = tk.BooleanVar(self)
                 self.integration_test = tk.BooleanVar(self)
                 self.section_check = tk.BooleanVar(self)
-
                 self.score = tk.IntVar(self, 0)
+                self.grade = tk.StringVar(self, "Not Attempted")
                 self.users = {}
                 self.current_user = ""
-
                 self.frames = {}
 
                 for f in (StartingPage, SelectionPage, EndPage):
@@ -96,7 +93,7 @@ class RootFrame(tk.Tk):
                 popup_box = tk.Tk()
                 popup_box.geometry("500x300")
 
-                def remove_user(data, dictionary, user, json_file, value):
+                def remove_user(dictionary, user, json_file, value):
                         if value:
                                 json_file.close()
                                 with open("user_data.json", "w") as json_file_write:
@@ -111,8 +108,8 @@ class RootFrame(tk.Tk):
                 i = 0
                 with open("user_data.json", "r+") as json_file:
                         data = json.load(json_file)
-                        users = data['users']
-                        for user in data['users']:
+                        users = {k : v for k, v in sorted(data['users'].items())}
+                        for user in users:
                                 user_name = tk.StringVar(popup_box)
                                 user_name.set(users[user]['name'])
                                 user_score = tk.IntVar(popup_box)
@@ -122,7 +119,7 @@ class RootFrame(tk.Tk):
                                 user_sections = tk.StringVar(popup_box)
                                 user_sections.set(users[user]['sections'])
 
-                                delete_user = ttk.Button(popup_box, text="Remove User", command=lambda: remove_user(data, users, user, json_file, tk.messagebox.askyesno(self, message="Remove User?")))
+                                delete_user = ttk.Button(popup_box, text="Remove User", command=lambda user=user: remove_user(users, user, json_file, tk.messagebox.askyesno(self, message="Remove User?")))
                         
                                 name_label = ttk.Label(popup_box, text=user_name.get())
                                 name_label.grid(row=i, column=0)
@@ -223,6 +220,16 @@ class RootFrame(tk.Tk):
                                 current_score += self.score.get()+self.frames[i].correct
                 self.users[self.current_user].score = current_score
                 self.score.set(current_score)
+
+                if self.users[self.current_user].score < (0.2 * len(self.users[self.current_user].sections) * 20) or self.users[self.current_user].score == 0:
+                        self.grade.set("Not Achieved")
+                elif self.users[self.current_user].score < (0.4 * len(self.users[self.current_user].sections) * 20):
+                        self.grade.set("Achieved")
+                elif self.users[self.current_user].score < (0.8 * len(self.users[self.current_user].sections) * 20):
+                        self.grade.set("Merit")
+                else:
+                        self.grade.set("Excellence")
+                self.users[self.current_user].grade = self.grade.get()
 
         def check_section(self):
                 sections = []
@@ -336,7 +343,7 @@ class QuestionPage(tk.Frame):
 
                 back_button = ttk.Button(self, text="Back", command=lambda: controller.show_frame("QuestionPage" + str(number-1)))
                 back_button.pack()
-                skip_button = ttk.Button(self, text="Skip", command=lambda next_page=next_page: combine_funcs(controller.check_answer(1, 0, self, end_number), controller.show_frame(next_page)))
+                skip_button = ttk.Button(self, text="Skip", command=lambda next_page=next_page: combine_funcs(controller.check_answer(1, 0, score_modifier, self, end_number), controller.show_frame(next_page)))
                 skip_button.pack()
                 popup_button = ttk.Button(self, text="Restart", command=lambda: controller.restart(tk.messagebox.askyesno(self, message="Restart?")))
                 popup_button.pack()
@@ -352,6 +359,8 @@ class EndPage(tk.Frame):
 
                 answers_correct = ttk.Label(self, textvariable=controller.score)
                 answers_correct.pack()
+                grade = ttk.Label(self, textvariable=controller.grade)
+                grade.pack()
                 button = ttk.Button(self, text="New quiz", command=lambda: controller.new_user(tk.messagebox.askyesno(self, message="Start again?")))
                 button.pack()
                 button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno(self, message="Quit?")))
