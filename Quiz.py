@@ -1,9 +1,11 @@
 from variables import *
-import math, random, json
+import math, random, json, webbrowser
 import tkinter as tk
 from tkinter import simpledialog, ttk
 
 LARGE_FONT = ("Verdana", 12)
+REGULAR_FONT = ("Verdana", 10)
+SMALL_FONT = ("Verdana", 8)
 
 def combine_funcs(*funcs):
         """A function designed to return multiple functions for the tkinter button commands"""
@@ -11,6 +13,12 @@ def combine_funcs(*funcs):
                 for f in funcs:
                         f(*args, **kwargs)
         return combined_func
+
+def open_help():
+        webbrowser.open("https://github.com/TonySchaufelberger/Python-Calculus-Quiz-Code", new=2)
+
+def help_callback(event):
+        open_help()
 
 class UserData():
         """"""
@@ -48,17 +56,21 @@ class RootFrame(tk.Tk):
                 tk.Tk.__init__(self, *args, **kwargs)
                 tk.Tk.iconbitmap(self, default="")
                 tk.Tk.wm_title(self, "Level 3 Calculus Revision Quiz")
+                self.bind('<F1>', help_callback)
+
+                style = ttk.Style()
 
                 topbar = tk.Frame(self)
                 topbar.pack(side="top", fill="both", expand=True)
                 
                 menubar = tk.Menu(self)
                 filemenu = tk.Menu(menubar, tearoff=0)
-                filemenu.add_command(label="New User", command=lambda: self.new_user(tk.messagebox.askyesno(self, message="New User?")))
+                filemenu.add_command(label="New User", command=lambda: self.new_user(tk.messagebox.askyesno("Confirmation", message="New User?")))
                 menubar.add_cascade(label="File", menu=filemenu)
                 scoremenu = tk.Menu(menubar, tearoff=0)
                 scoremenu.add_command(label="Scores", command=lambda: self.score_popup())
                 menubar.add_cascade(label="Scoreboards", menu=scoremenu)
+                menubar.add_command(label="(F1) Help", command=lambda: open_help())
                 self.config(menu=menubar)
 
                 # I've converted container to self.container so I can access it in a different method
@@ -119,7 +131,7 @@ class RootFrame(tk.Tk):
                                 user_sections = tk.StringVar(popup_box)
                                 user_sections.set(users[user]['sections'])
 
-                                delete_user = ttk.Button(popup_box, text="Remove User", command=lambda user=user: remove_user(users, user, json_file, tk.messagebox.askyesno(self, message="Remove User?")))
+                                delete_user = ttk.Button(popup_box, text="Remove User", command=lambda user=user: remove_user(users, user, json_file, tk.messagebox.askyesno("Confirmation", message="Remove User?")))
                         
                                 name_label = ttk.Label(popup_box, text=user_name.get())
                                 name_label.grid(row=i, column=0)
@@ -149,7 +161,7 @@ class RootFrame(tk.Tk):
 
                         """The 'i' variable is used to determine which question list the question is taken from.
                         When sections are off, it's random. When they are on, it is in order."""
-                        if self.section_check.get() == True:
+                        if self.section_check.get() == False:
                                 modifier = math.floor(question / 10)
                                 i = modifier
                                 # The i_2 here selects the corresponding question type with the new list
@@ -198,7 +210,7 @@ class RootFrame(tk.Tk):
         def start_quiz(self):
                 section_list = self.check_section()
                 if section_list == []:
-                        tk.messagebox.showwarning(self, message="Please select a question type.")
+                        tk.messagebox.showwarning("Warning", message="Please select a question type.")
                 else:
                         self.generate_quiz(section_list)
                         self.show_frame("QuestionPage0")
@@ -270,21 +282,25 @@ class StartingPage(tk.Frame):
         """This page contains a next button to the selection page"""
         def __init__(self, parent, controller):
                 tk.Frame.__init__(self, parent)
-                label = ttk.Label(self, text="This is the start page", font=LARGE_FONT)
+                label = ttk.Label(self, text="Welcome to NCEA Level 3 Calculus External Revision Quiz.", font=LARGE_FONT)
                 label.pack()
 
                 name = tk.StringVar(controller)
-
-                entry = ttk.Entry(self, textvariable=name)
+                entry = ttk.Entry(self, background="grey", textvariable=name, font=REGULAR_FONT)
                 entry.pack()
 
                 def save_name(saved_name):
-                        controller.current_user = saved_name
-                        controller.users[saved_name] = UserData(saved_name)
+                        if saved_name.get() == "":
+                                tk.messagebox.showwarning("Warning", message="Please give a name.")
+                        else:
+                                controller.current_user = saved_name.get()
+                                controller.users[saved_name.get()] = UserData(saved_name.get())
+                                saved_name.set("")
+                                controller.show_frame(SelectionPage)
 
-                next_button = ttk.Button(self, text="Next", command=lambda: combine_funcs(save_name(name.get()), controller.show_frame(SelectionPage)))
+                next_button = ttk.Button(self, text="Next", command=lambda: save_name(name))
                 next_button.pack()
-                button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno(self, message="Quit?")))
+                button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno("Confirmation", message="Quit?")))
                 button.pack()
 
 class SelectionPage(tk.Frame):
@@ -301,8 +317,8 @@ class SelectionPage(tk.Frame):
                 complex_check.pack()
                 differentiation_check.pack()
                 integration_check.pack()
-                section_check_on = ttk.Radiobutton(self, text="Sections On", variable=controller.section_check, value=True)
-                section_check_off = ttk.Radiobutton(self, text="Sections Off", variable=controller.section_check, value=False)
+                section_check_on = ttk.Radiobutton(self, text="Sections On", variable=controller.section_check, value=False)
+                section_check_off = ttk.Radiobutton(self, text="Sections Off", variable=controller.section_check, value=True)
                 section_check_on.pack()
                 section_check_off.pack()
 
@@ -345,9 +361,9 @@ class QuestionPage(tk.Frame):
                 back_button.pack()
                 skip_button = ttk.Button(self, text="Skip", command=lambda next_page=next_page: combine_funcs(controller.check_answer(1, 0, score_modifier, self, end_number), controller.show_frame(next_page)))
                 skip_button.pack()
-                popup_button = ttk.Button(self, text="Restart", command=lambda: controller.restart(tk.messagebox.askyesno(self, message="Restart?")))
+                popup_button = ttk.Button(self, text="Restart", command=lambda: controller.restart(tk.messagebox.askyesno("Confirmation", message="Restart?")))
                 popup_button.pack()
-                button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno(self, message="Quit?")))
+                button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno("Confirmation", message="Quit?")))
                 button.pack()
 
 class EndPage(tk.Frame):
@@ -361,9 +377,9 @@ class EndPage(tk.Frame):
                 answers_correct.pack()
                 grade = ttk.Label(self, textvariable=controller.grade)
                 grade.pack()
-                button = ttk.Button(self, text="New quiz", command=lambda: controller.new_user(tk.messagebox.askyesno(self, message="Start again?")))
+                button = ttk.Button(self, text="New quiz", command=lambda: controller.new_user(tk.messagebox.askyesno("Confirmation", message="Start again?")))
                 button.pack()
-                button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno(self, message="Quit?")))
+                button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno("Confirmation", message="Quit?")))
                 button.pack()
 
 quiz = RootFrame()
