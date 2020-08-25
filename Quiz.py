@@ -2,6 +2,7 @@ from variables import *
 import math, random, json, webbrowser
 import tkinter as tk
 from tkinter import simpledialog, ttk
+from ttkthemes import ThemedStyle
 
 LARGE_FONT = ("Verdana", 12)
 REGULAR_FONT = ("Verdana", 10)
@@ -58,7 +59,15 @@ class RootFrame(tk.Tk):
                 tk.Tk.wm_title(self, "Level 3 Calculus Revision Quiz")
                 self.bind('<F1>', help_callback)
 
-                style = ttk.Style()
+                style = ThemedStyle(self)
+                print(style.get_themes())
+                style.set_theme('ubuntu')
+                # For next, quit, restart buttons
+                style.configure("Movement.TButton")
+                style.configure("Answer.TButton", foreground="red", font=REGULAR_FONT)
+                style.configure("TEntry", foreground="blue")
+                style.configure("TCheckButton")
+                style.configure("TRadiobutton")
 
                 topbar = tk.Frame(self)
                 topbar.pack(side="top", fill="both", expand=True)
@@ -104,6 +113,8 @@ class RootFrame(tk.Tk):
         def score_popup(self):
                 popup_box = tk.Tk()
                 popup_box.geometry("500x300")
+                style = ThemedStyle(popup_box)
+                style.set_theme('radiance')
 
                 def remove_user(dictionary, user, json_file, value):
                         if value:
@@ -354,7 +365,7 @@ class QuestionPage(tk.Frame):
                 I've put this into a for loop to make it easier to program"""
                 answer = {}
                 for letter in ['a','b','c','d']:
-                        answer[letter] = ttk.Button(self, text=self.question_list[question_i]['answers'][letter], command=lambda letter=letter, correct_letter=self.question_list[question_i]["correct_answer"], next_page=next_page: combine_funcs(controller.check_answer(letter, correct_letter, score_modifier, self, end_number), controller.show_frame(next_page)))
+                        answer[letter] = ttk.Button(self, style="Answer.TButton", text=self.question_list[question_i]['answers'][letter], command=lambda letter=letter, correct_letter=self.question_list[question_i]["correct_answer"], next_page=next_page: combine_funcs(controller.check_answer(letter, correct_letter, score_modifier, self, end_number), controller.show_frame(next_page)))
                         answer[letter].pack()
 
                 back_button = ttk.Button(self, text="Back", command=lambda: controller.show_frame("QuestionPage" + str(number-1)))
