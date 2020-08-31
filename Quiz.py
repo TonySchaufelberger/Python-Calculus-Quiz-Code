@@ -2,7 +2,6 @@ from variables import *
 import math, random, json, webbrowser
 import tkinter as tk
 from tkinter import simpledialog, ttk
-from ttkthemes import ThemedStyle
 
 LARGE_FONT = ("Verdana", 12)
 REGULAR_FONT = ("Verdana", 10)
@@ -14,6 +13,12 @@ def combine_funcs(*funcs):
                 for f in funcs:
                         f(*args, **kwargs)
         return combined_func
+
+def row_column_configure(parent, rows, columns):
+        for i in range(rows):
+                parent.rowconfigure(i, weight=1)
+        for j in range(columns):
+                parent.columnconfigure(j, weight=1)
 
 def open_help():
         webbrowser.open("https://github.com/TonySchaufelberger/Python-Calculus-Quiz-Code", new=2)
@@ -59,18 +64,10 @@ class RootFrame(tk.Tk):
                 tk.Tk.wm_title(self, "Level 3 Calculus Revision Quiz")
                 self.bind('<F1>', help_callback)
 
-                style = ThemedStyle(self)
-                print(style.get_themes())
-                style.set_theme('ubuntu')
-                # For next, quit, restart buttons
-                style.configure("Movement.TButton")
-                style.configure("Answer.TButton", foreground="red", font=REGULAR_FONT)
-                style.configure("TEntry", foreground="blue")
-                style.configure("TCheckButton")
-                style.configure("TRadiobutton")
+                style = ttk.Style()
 
                 topbar = tk.Frame(self)
-                topbar.pack(side="top", fill="both", expand=True)
+                topbar.pack(side="top", fill="both", expand=False)
                 
                 menubar = tk.Menu(self)
                 filemenu = tk.Menu(menubar, tearoff=0)
@@ -87,7 +84,6 @@ class RootFrame(tk.Tk):
                 self.container.pack(side="top", fill="both", expand=True)
                 self.container.grid_rowconfigure(0, weight=1)
                 self.container.grid_columnconfigure(0, weight=1)
-                self.container.grid_columnconfigure(1, weight=1)
 
                 self.complex_test = tk.BooleanVar(self)
                 self.differentiation_test = tk.BooleanVar(self)
@@ -113,8 +109,6 @@ class RootFrame(tk.Tk):
         def score_popup(self):
                 popup_box = tk.Tk()
                 popup_box.geometry("500x300")
-                style = ThemedStyle(popup_box)
-                style.set_theme('radiance')
 
                 def remove_user(dictionary, user, json_file, value):
                         if value:
@@ -319,22 +313,23 @@ class SelectionPage(tk.Frame):
         It toggles if the question_list will include complex, differentiation and/or integration, and whether it's separated by section"""
         def __init__(self, parent, controller):
                 tk.Frame.__init__(self, parent)
-                label = ttk.Label(self, text="This is the section page", font=LARGE_FONT)
-                label.pack(pady=10,padx=10)
+                row_column_configure(self, 8, 4)
+                label = ttk.Label(self, text="Select which sections you want to test", font=LARGE_FONT)
+                label.grid(row=0, column=0, columnspan=4, sticky="nsew")
 
                 complex_check = ttk.Checkbutton(self, text="Test Complex Numbers?", variable=controller.complex_test)
                 differentiation_check = ttk.Checkbutton(self, text="Test Differentiation?", variable=controller.differentiation_test)
                 integration_check = ttk.Checkbutton(self, text="Test Integration?", variable=controller.integration_test)
-                complex_check.pack()
-                differentiation_check.pack()
-                integration_check.pack()
+                complex_check.grid(row=1, rowspan=2, column=1, sticky="nsew")
+                differentiation_check.grid(row=3, rowspan=2, column=1, sticky="nsew")
+                integration_check.grid(row=5, rowspan=2, column=1, sticky="nsew")
                 section_check_on = ttk.Radiobutton(self, text="Sections On", variable=controller.section_check, value=False)
                 section_check_off = ttk.Radiobutton(self, text="Sections Off", variable=controller.section_check, value=True)
-                section_check_on.pack()
-                section_check_off.pack()
+                section_check_on.grid(row=2, column=2, sticky="nsew")
+                section_check_off.grid(row=4, column=2, sticky="nsew")
 
                 button = ttk.Button(self, text="Start Quiz", command=lambda: controller.start_quiz())
-                button.pack()
+                button.grid(row=7, column=1, columnspan=2, sticky="ew")
 
 class QuestionPage(tk.Frame):
         """This is the general frame for questions, which will change depending on the number and type of question asked
@@ -347,14 +342,15 @@ class QuestionPage(tk.Frame):
                 self.question_list = question_list
                 text = "A question" + str(number+1)
                 label = ttk.Label(self, text=text, font=LARGE_FONT)
-                label.pack(pady=10,padx=10)
+                label.grid(row=0, column=0, columnspan=4)
+                row_column_configure(self, 7, 4)
 
                 self.correct = 0
 
                 """Essentially, each question is index 0 of the shuffled list. At the end, this index is deleted, so that old index 1 becomes index 0.
                 This way, no question is repeated."""
                 question = ttk.Label(self, text=self.question_list[question_i]['question'])
-                question.pack()
+                question.grid(row=1, column=0, columnspan=4)
 
                 if number == end_number - 1:
                         next_page = EndPage
@@ -364,18 +360,21 @@ class QuestionPage(tk.Frame):
                 """The for loop here generates buttons of each answer. Each button has the command to check if it was right, and then move to the next frame.
                 I've put this into a for loop to make it easier to program"""
                 answer = {}
+                i, j = 2.6, 0
                 for letter in ['a','b','c','d']:
-                        answer[letter] = ttk.Button(self, style="Answer.TButton", text=self.question_list[question_i]['answers'][letter], command=lambda letter=letter, correct_letter=self.question_list[question_i]["correct_answer"], next_page=next_page: combine_funcs(controller.check_answer(letter, correct_letter, score_modifier, self, end_number), controller.show_frame(next_page)))
-                        answer[letter].pack()
+                        answer[letter] = ttk.Button(self, text=self.question_list[question_i]['answers'][letter], command=lambda letter=letter, correct_letter=self.question_list[question_i]["correct_answer"], next_page=next_page: combine_funcs(controller.check_answer(letter, correct_letter, score_modifier, self, end_number), controller.show_frame(next_page)))
+                        answer[letter].grid(row=round(i), column=[1,2,1,2][j])
+                        i += 0.5
+                        j += 1
 
                 back_button = ttk.Button(self, text="Back", command=lambda: controller.show_frame("QuestionPage" + str(number-1)))
-                back_button.pack()
+                back_button.grid(row=4, column=0)
                 skip_button = ttk.Button(self, text="Skip", command=lambda next_page=next_page: combine_funcs(controller.check_answer(1, 0, score_modifier, self, end_number), controller.show_frame(next_page)))
-                skip_button.pack()
+                skip_button.grid(row=4, column=3)
                 popup_button = ttk.Button(self, text="Restart", command=lambda: controller.restart(tk.messagebox.askyesno("Confirmation", message="Restart?")))
-                popup_button.pack()
+                popup_button.grid(row=6, column=0)
                 button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno("Confirmation", message="Quit?")))
-                button.pack()
+                button.grid(row=6, column=3)
 
 class EndPage(tk.Frame):
         """"""
