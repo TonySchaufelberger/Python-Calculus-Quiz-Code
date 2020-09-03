@@ -65,18 +65,20 @@ class RootFrame(tk.Tk):
                 self.bind('<F1>', help_callback)
 
                 style = ttk.Style()
+                style.configure('TButton', font=SMALL_FONT)
 
                 topbar = tk.Frame(self)
                 topbar.pack(side="top", fill="both", expand=False)
                 
                 menubar = tk.Menu(self)
                 filemenu = tk.Menu(menubar, tearoff=0)
-                filemenu.add_command(label="New User", command=lambda: self.new_user(tk.messagebox.askyesno("Confirmation", message="New User?")))
-                menubar.add_cascade(label="File", menu=filemenu)
+                filemenu.add_command(label="Options", font=SMALL_FONT)
+                filemenu.add_command(label="New User", command=lambda: self.new_user(tk.messagebox.askyesno("Confirmation", message="New User?")), font=SMALL_FONT)
+                menubar.add_cascade(label="File", menu=filemenu, font=SMALL_FONT)
                 scoremenu = tk.Menu(menubar, tearoff=0)
-                scoremenu.add_command(label="Scores", command=lambda: self.score_popup())
-                menubar.add_cascade(label="Scoreboards", menu=scoremenu)
-                menubar.add_command(label="(F1) Help", command=lambda: open_help())
+                scoremenu.add_command(label="Show Scores", command=lambda: self.score_popup(), font=SMALL_FONT)
+                menubar.add_cascade(label="Scoreboards", menu=scoremenu, font=SMALL_FONT)
+                menubar.add_command(label="(F1) Help", command=lambda: open_help(), font=SMALL_FONT)
                 self.config(menu=menubar)
 
                 # I've converted container to self.container so I can access it in a different method
@@ -90,6 +92,7 @@ class RootFrame(tk.Tk):
                 self.integration_test = tk.BooleanVar(self)
                 self.section_check = tk.BooleanVar(self)
                 self.score = tk.IntVar(self, 0)
+                self.number_correct = tk.IntVar(self, 0)
                 self.grade = tk.StringVar(self, "Not Attempted")
                 self.users = {}
                 self.current_user = ""
@@ -108,7 +111,6 @@ class RootFrame(tk.Tk):
 
         def score_popup(self):
                 popup_box = tk.Tk()
-                popup_box.geometry("500x300")
 
                 def remove_user(dictionary, user, json_file, value):
                         if value:
@@ -149,6 +151,8 @@ class RootFrame(tk.Tk):
                                 delete_user.grid(row=i, column=4)
                         
                                 i += 1
+                row_column_configure(popup_box, i, 5)
+                popup_box.geometry("600x"+str(50*i))
                 popup_box.mainloop()
 
         def generate_quiz(self, *question_lists):
@@ -224,17 +228,21 @@ class RootFrame(tk.Tk):
                 """Checks if the answer selected by a button is correct"""
                 self.users[self.current_user].question = page.number
                 if answer == correct_answer:
-                        page.correct = 1 * score_modifier
+                        page.score = 1 * score_modifier
+                        page.correct += 1
                 else:
+                        page.score = 0
                         page.correct = 0
                 if self.users[self.current_user].question == end_number - 1:
                         self.check_score()
 
         def check_score(self):
                 current_score = 0
+                number_correct = 0
                 for i in self.frames:
                         if isinstance(i, str):
-                                current_score += self.score.get()+self.frames[i].correct
+                                current_score += self.score.get()+self.frames[i].score
+                                self.number_correct.set(self.frames[i].score)
                 self.users[self.current_user].score = current_score
                 self.score.set(current_score)
 
@@ -340,16 +348,21 @@ class QuestionPage(tk.Frame):
                 tk.Frame.__init__(self, parent)
                 self.number = number
                 self.question_list = question_list
-                text = "A question" + str(number+1)
+                row_column_configure(self, 6, 4)
+                text = "Question " + str(number+1) + "/" + str(end_number)
                 label = ttk.Label(self, text=text, font=LARGE_FONT)
                 label.grid(row=0, column=0, columnspan=4)
-                row_column_configure(self, 7, 4)
+                type_label = ttk.Label(self, text=self.question_list[question_i]["type"], font=REGULAR_FONT)
+                type_label.grid(row=0, rowspan=2, column=0)
+                user_label = ttk.Label(self, text="User: " + controller.current_user, font=REGULAR_FONT)
+                user_label.grid(row=0, rowspan=2, column=3)
 
-                self.correct = 0
+                self.score = 0
+                self.correct=0
 
                 """Essentially, each question is index 0 of the shuffled list. At the end, this index is deleted, so that old index 1 becomes index 0.
                 This way, no question is repeated."""
-                question = ttk.Label(self, text=self.question_list[question_i]['question'])
+                question = ttk.Label(self, text=self.question_list[question_i]['question'], font=REGULAR_FONT)
                 question.grid(row=1, column=0, columnspan=4)
 
                 if number == end_number - 1:
@@ -360,21 +373,23 @@ class QuestionPage(tk.Frame):
                 """The for loop here generates buttons of each answer. Each button has the command to check if it was right, and then move to the next frame.
                 I've put this into a for loop to make it easier to program"""
                 answer = {}
-                i, j = 2.6, 0
+                i, j = 0.6, 0
+                answers_frame = tk.Frame(self)
                 for letter in ['a','b','c','d']:
-                        answer[letter] = ttk.Button(self, text=self.question_list[question_i]['answers'][letter], command=lambda letter=letter, correct_letter=self.question_list[question_i]["correct_answer"], next_page=next_page: combine_funcs(controller.check_answer(letter, correct_letter, score_modifier, self, end_number), controller.show_frame(next_page)))
-                        answer[letter].grid(row=round(i), column=[1,2,1,2][j])
+                        answer[letter] = ttk.Button(answers_frame, text=self.question_list[question_i]['answers'][letter], command=lambda letter=letter, correct_letter=self.question_list[question_i]["correct_answer"], next_page=next_page: combine_funcs(controller.check_answer(letter, correct_letter, score_modifier, self, end_number), controller.show_frame(next_page)))
+                        answer[letter].grid(row=round(i), column=[1,2,1,2][j], pady=2, padx=2)
                         i += 0.5
                         j += 1
+                answers_frame.grid(row=2, column=1, columnspan=2)
 
-                back_button = ttk.Button(self, text="Back", command=lambda: controller.show_frame("QuestionPage" + str(number-1)))
-                back_button.grid(row=4, column=0)
+                back_button = ttk.Button(self, text="Back", command=lambda: controller.show_frame("QuestionPage" + str(number-1) if number != 0 else "QuestionPage" + str(number)))
+                back_button.grid(row=3, column=1)
                 skip_button = ttk.Button(self, text="Skip", command=lambda next_page=next_page: combine_funcs(controller.check_answer(1, 0, score_modifier, self, end_number), controller.show_frame(next_page)))
-                skip_button.grid(row=4, column=3)
+                skip_button.grid(row=3, column=2)
                 popup_button = ttk.Button(self, text="Restart", command=lambda: controller.restart(tk.messagebox.askyesno("Confirmation", message="Restart?")))
-                popup_button.grid(row=6, column=0)
-                button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno("Confirmation", message="Quit?")))
-                button.grid(row=6, column=3)
+                popup_button.grid(row=5, column=0, sticky="e")
+                quit_button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno("Confirmation", message="Quit?")))
+                quit_button.grid(row=5, column=3, sticky="w")
 
 class EndPage(tk.Frame):
         """"""
@@ -387,10 +402,10 @@ class EndPage(tk.Frame):
                 answers_correct.pack()
                 grade = ttk.Label(self, textvariable=controller.grade)
                 grade.pack()
-                button = ttk.Button(self, text="New quiz", command=lambda: controller.new_user(tk.messagebox.askyesno("Confirmation", message="Start again?")))
-                button.pack()
-                button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno("Confirmation", message="Quit?")))
-                button.pack()
+                new_quiz_button = ttk.Button(self, text="Save user and start again?", command=lambda: controller.new_user(tk.messagebox.askyesno("Confirmation", message="Start a new quiz?")))
+                new_quiz_button.pack()
+                quit_button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno("Confirmation", message="Quit?")))
+                quit_button.pack()
 
 quiz = RootFrame()
 quiz.geometry("500x300")
