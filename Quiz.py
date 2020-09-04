@@ -29,10 +29,11 @@ def help_callback(event):
 class UserData():
         """"""
 
-        def __init__(self, name, score=0, grade="Not Achieved", sections=["Not attempted"]):
+        def __init__(self, name, score=0, grade="Not Achieved", year=13, sections=["Not attempted"]):
                 self.name = name
                 self.score = score
                 self.grade = grade
+                self.year = year
                 self.sections = sections
 
                 self.ongoing = True
@@ -48,7 +49,7 @@ class UserData():
                                 original_name = "{}({})".format(self.name, i)
                                 i += 1
                         self.name = original_name
-                        user_data = {self.name: {"name": self.name, "score": self.score, "grade": self.grade, "sections": ", ".join(self.sections)}}
+                        user_data = {self.name: {"name": self.name, "score": self.score, "grade": self.grade, "year": self.year, "sections": ", ".join(self.sections)}}
                         dic["users"].update(user_data)
                         json_file.seek(0)
                         json.dump(dic, json_file, indent=4)
@@ -64,8 +65,8 @@ class RootFrame(tk.Tk):
                 tk.Tk.wm_title(self, "Level 3 Calculus Revision Quiz")
                 self.bind('<F1>', help_callback)
 
-                style = ttk.Style()
-                style.configure('TButton', font=SMALL_FONT)
+                self.style = ttk.Style()
+                self.style.configure('TButton', font=SMALL_FONT)
 
                 topbar = tk.Frame(self)
                 topbar.pack(side="top", fill="both", expand=False)
@@ -94,6 +95,7 @@ class RootFrame(tk.Tk):
                 self.score = tk.IntVar(self, 0)
                 self.number_correct = tk.IntVar(self, 0)
                 self.grade = tk.StringVar(self, "Not Attempted")
+                self.year = tk.IntVar(self, 13)
                 self.users = {}
                 self.current_user = ""
                 self.frames = {}
@@ -124,7 +126,17 @@ class RootFrame(tk.Tk):
                                 popup_box.destroy()
                                 self.score_popup()
 
-                i = 0
+                i = 1
+                name_title = ttk.Label(popup_box, text="Name", font=LARGE_FONT)
+                score_title = ttk.Label(popup_box, text="Score", font=LARGE_FONT)
+                grade_title = ttk.Label(popup_box, text="Grade", font=LARGE_FONT)
+                year_title = ttk.Label(popup_box, text="Year", font=LARGE_FONT)
+                sections_title = ttk.Label(popup_box, text="Sections", font=LARGE_FONT)
+                name_title.grid(row=0, column=0)
+                score_title.grid(row=0, column=1)
+                grade_title.grid(row=0, column=2)
+                year_title.grid(row=0, column=3)
+                sections_title.grid(row=0, column=4)
                 with open("user_data.json", "r+") as json_file:
                         data = json.load(json_file)
                         users = {k : v for k, v in sorted(data['users'].items())}
@@ -135,24 +147,29 @@ class RootFrame(tk.Tk):
                                 user_score.set(users[user]['score'])
                                 user_grade = tk.StringVar(popup_box)
                                 user_grade.set(users[user]['grade'])
+                                user_year = tk.IntVar(popup_box)
+                                user_year.set(users[user]['year'])
                                 user_sections = tk.StringVar(popup_box)
                                 user_sections.set(users[user]['sections'])
 
                                 delete_user = ttk.Button(popup_box, text="Remove User", command=lambda user=user: remove_user(users, user, json_file, tk.messagebox.askyesno("Confirmation", message="Remove User?")))
                         
-                                name_label = ttk.Label(popup_box, text=user_name.get())
+                                name_label = ttk.Label(popup_box, text=user_name.get(), font=REGULAR_FONT)
                                 name_label.grid(row=i, column=0)
-                                score_label = ttk.Label(popup_box, text=user_score.get())
+                                score_label = ttk.Label(popup_box, text=user_score.get(), font=REGULAR_FONT)
                                 score_label.grid(row=i, column=1)
-                                grade_label = ttk.Label(popup_box, text=user_grade.get())
+                                grade_label = ttk.Label(popup_box, text=user_grade.get(), font=REGULAR_FONT)
                                 grade_label.grid(row=i, column=2)
-                                sections_label = ttk.Label(popup_box, text=user_sections.get())
-                                sections_label.grid(row=i, column=3)
-                                delete_user.grid(row=i, column=4)
+                                year_label = ttk.Label(popup_box, text=user_year.get(), font=REGULAR_FONT)
+                                year_label.grid(row=i, column=3)
+                                sections_label = ttk.Label(popup_box, text=user_sections.get(), font=REGULAR_FONT)
+                                sections_label.grid(row=i, column=4)
+                                delete_user.grid(row=i, column=5)
                         
                                 i += 1
-                row_column_configure(popup_box, i, 5)
-                popup_box.geometry("600x"+str(50*i))
+                row_column_configure(popup_box, i, 6)
+                popup_box.geometry("800x"+str(50*i))
+                popup_box.resizable(False, False)
                 popup_box.mainloop()
 
         def generate_quiz(self, *question_lists):
@@ -295,12 +312,18 @@ class StartingPage(tk.Frame):
         """This page contains a next button to the selection page"""
         def __init__(self, parent, controller):
                 tk.Frame.__init__(self, parent)
+                row_column_configure(self, 3, 5)
                 label = ttk.Label(self, text="Welcome to NCEA Level 3 Calculus External Revision Quiz.", font=LARGE_FONT)
-                label.pack()
+                label.grid(row=0, column=0, columnspan=5)
 
                 name = tk.StringVar(controller)
-                entry = ttk.Entry(self, background="grey", textvariable=name, font=REGULAR_FONT)
-                entry.pack()
+                year_list = (13, 12, 11, 10, 9)
+                year_dropdown = tk.OptionMenu(self, controller.year, *year_list)
+                year_dropdown.grid(row=1, column=4)
+                ttk.Label(self, text="Name:").grid(row=1, column=0)
+                ttk.Label(self, text="Year:").grid(row=1, column=3)
+                name_entry = ttk.Entry(self, background="grey", textvariable=name, font=REGULAR_FONT)
+                name_entry.grid(row=1, column=1)
 
                 def save_name(saved_name):
                         if saved_name.get() == "":
@@ -308,13 +331,14 @@ class StartingPage(tk.Frame):
                         else:
                                 controller.current_user = saved_name.get()
                                 controller.users[saved_name.get()] = UserData(saved_name.get())
+                                controller.users[saved_name.get()].year = controller.year.get()
                                 saved_name.set("")
                                 controller.show_frame(SelectionPage)
 
                 next_button = ttk.Button(self, text="Next", command=lambda: save_name(name))
-                next_button.pack()
+                next_button.grid(row=2, column=4)
                 button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno("Confirmation", message="Quit?")))
-                button.pack()
+                button.grid(row=2, column=0)
 
 class SelectionPage(tk.Frame):
         """This page contains check buttons to toggle which type of question will be asked in the quiz
@@ -396,16 +420,16 @@ class EndPage(tk.Frame):
         def __init__(self, parent, controller):
                 tk.Frame.__init__(self, parent)
                 label = ttk.Label(self, text="End score", font=LARGE_FONT)
-                label.pack(pady=10,padx=10)
+                label.grid(pady=10,padx=10)
 
                 answers_correct = ttk.Label(self, textvariable=controller.score)
-                answers_correct.pack()
+                answers_correct.grid()
                 grade = ttk.Label(self, textvariable=controller.grade)
-                grade.pack()
+                grade.grid()
                 new_quiz_button = ttk.Button(self, text="Save user and start again?", command=lambda: controller.new_user(tk.messagebox.askyesno("Confirmation", message="Start a new quiz?")))
-                new_quiz_button.pack()
+                new_quiz_button.grid()
                 quit_button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno("Confirmation", message="Quit?")))
-                quit_button.pack()
+                quit_button.grid()
 
 quiz = RootFrame()
 quiz.geometry("500x300")
