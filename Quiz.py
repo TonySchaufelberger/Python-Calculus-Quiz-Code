@@ -97,7 +97,7 @@ class RootFrame(tk.Tk):
                 self.grade = tk.StringVar(self, "Not Attempted")
                 self.year = tk.IntVar(self, 13)
                 self.users = {}
-                self.current_user = ""
+                self.current_user = tk.StringVar(self)
                 self.frames = {}
 
                 for f in (StartingPage, SelectionPage, EndPage):
@@ -176,11 +176,11 @@ class RootFrame(tk.Tk):
                 """This method is the same as the for loop in the __init__, except it passes each question as its own instance
                 It takes from a quesiton_list generated from the types of question chosen by the user"""
                 length, section_length = len(question_lists[0])*10, 10
+                difficulty, difficulty_before = "easy", ""
                 new_list = [{"easy": [], "medium": [], "hard": []}, {"easy": [], "medium": [], "hard": []}, {"easy": [], "medium": [], "hard": []}]
                 modifier = 1
                 # The question_i variable is reset when there is a change in difficulty
                 question_i = 0
-                difficulty, difficulty_before = "easy", ""
                 for question in range(length):
 
                         difficulty_before = difficulty
@@ -243,15 +243,16 @@ class RootFrame(tk.Tk):
 
         def check_answer(self, answer, correct_answer, score_modifier, page, end_number):
                 """Checks if the answer selected by a button is correct"""
-                self.users[self.current_user].question = page.number
+                self.users[self.current_user.get()].question = page.number
                 if answer == correct_answer:
                         page.score = 1 * score_modifier
                         page.correct += 1
                 else:
                         page.score = 0
                         page.correct = 0
-                if self.users[self.current_user].question == end_number - 1:
+                if self.users[self.current_user.get()].question == end_number - 1:
                         self.check_score()
+                        self.show_answers()
 
         def check_score(self):
                 current_score = 0
@@ -260,18 +261,18 @@ class RootFrame(tk.Tk):
                         if isinstance(i, str):
                                 current_score += self.score.get()+self.frames[i].score
                                 self.number_correct.set(self.frames[i].score)
-                self.users[self.current_user].score = current_score
+                self.users[self.current_user.get()].score = current_score
                 self.score.set(current_score)
 
-                if self.users[self.current_user].score < (0.2 * len(self.users[self.current_user].sections) * 20) or self.users[self.current_user].score == 0:
+                if self.users[self.current_user.get()].score < (0.2 * len(self.users[self.current_user.get()].sections) * 20) or self.users[self.current_user.get()].score == 0:
                         self.grade.set("Not Achieved")
-                elif self.users[self.current_user].score < (0.4 * len(self.users[self.current_user].sections) * 20):
+                elif self.users[self.current_user.get()].score < (0.4 * len(self.users[self.current_user.get()].sections) * 20):
                         self.grade.set("Achieved")
-                elif self.users[self.current_user].score < (0.8 * len(self.users[self.current_user].sections) * 20):
+                elif self.users[self.current_user.get()].score < (0.8 * len(self.users[self.current_user.get()].sections) * 20):
                         self.grade.set("Merit")
                 else:
                         self.grade.set("Excellence")
-                self.users[self.current_user].grade = self.grade.get()
+                self.users[self.current_user.get()].grade = self.grade.get()
 
         def check_section(self):
                 sections = []
@@ -285,8 +286,16 @@ class RootFrame(tk.Tk):
                 if self.integration_test.get() == True:
                         sections += [integration_questions]
                         integration = "Integration"
-                self.users[self.current_user].sections = [section for section in [complex_numbers, differentiation, integration] if isinstance(section, str)]
+                self.users[self.current_user.get()].sections = [section for section in [complex_numbers, differentiation, integration] if isinstance(section, str)]
                 return sections
+
+        def show_answers(self):
+                i = len(self.frames) - 4
+                chosen_questions = []
+                while i > -1:
+                        chosen_questions.append({self.frames["QuestionPage" + str(i)].question_list[self.frames["QuestionPage" + str(i)].question_i]['question']:self.frames["QuestionPage" + str(i)].question_list[self.frames["QuestionPage" + str(i)].question_i]["correct_answer"]})
+                        i = i - 1
+                return chosen_questions
 
         def restart(self, value):
                 if value:
@@ -301,7 +310,7 @@ class RootFrame(tk.Tk):
 
         def new_user(self, value):
                 if self.restart(value):
-                        self.users[self.current_user].user_write()
+                        self.users[self.current_user.get()].user_write()
                         self.show_frame(StartingPage)
         
         def quit(self, value):
@@ -329,7 +338,7 @@ class StartingPage(tk.Frame):
                         if saved_name.get() == "":
                                 tk.messagebox.showwarning("Warning", message="Please give a name.")
                         else:
-                                controller.current_user = saved_name.get()
+                                controller.current_user.set(saved_name.get())
                                 controller.users[saved_name.get()] = UserData(saved_name.get())
                                 controller.users[saved_name.get()].year = controller.year.get()
                                 saved_name.set("")
@@ -372,13 +381,14 @@ class QuestionPage(tk.Frame):
                 tk.Frame.__init__(self, parent)
                 self.number = number
                 self.question_list = question_list
+                self.question_i = question_i
                 row_column_configure(self, 6, 4)
                 text = "Question " + str(number+1) + "/" + str(end_number)
                 label = ttk.Label(self, text=text, font=LARGE_FONT)
                 label.grid(row=0, column=0, columnspan=4)
                 type_label = ttk.Label(self, text=self.question_list[question_i]["type"], font=REGULAR_FONT)
                 type_label.grid(row=0, rowspan=2, column=0)
-                user_label = ttk.Label(self, text="User: " + controller.current_user, font=REGULAR_FONT)
+                user_label = ttk.Label(self, text="User: " + controller.current_user.get(), font=REGULAR_FONT)
                 user_label.grid(row=0, rowspan=2, column=3)
 
                 self.score = 0
@@ -419,17 +429,28 @@ class EndPage(tk.Frame):
         """"""
         def __init__(self, parent, controller):
                 tk.Frame.__init__(self, parent)
-                label = ttk.Label(self, text="End score", font=LARGE_FONT)
-                label.grid(pady=10,padx=10)
+                row_column_configure(self, 4, 4)
 
+                user_title = ttk.Label(self, text="User: ", font=LARGE_FONT)
+                user_title.grid(row=0, column=1)
+                name_title = ttk.Label(self, textvariable=controller.current_user, font=LARGE_FONT)
+                name_title.grid(row=0, column=2)
+                score_title = ttk.Label(self, text="End score: ", font=LARGE_FONT)
+                score_title.grid(pady=10,padx=10, row=1, column=1)
                 answers_correct = ttk.Label(self, textvariable=controller.score)
-                answers_correct.grid()
-                grade = ttk.Label(self, textvariable=controller.grade)
-                grade.grid()
+                answers_correct.grid(row=1, column=2)
+                grade = ttk.Label(self, textvariable=controller.grade, font=LARGE_FONT)
+                grade.grid(row=2, column=1, columnspan=2)
                 new_quiz_button = ttk.Button(self, text="Save user and start again?", command=lambda: controller.new_user(tk.messagebox.askyesno("Confirmation", message="Start a new quiz?")))
-                new_quiz_button.grid()
+                new_quiz_button.grid(row=3, column=1)
+                show_answers_button = ttk.Button(self, text="Show Answers", command=lambda: self.show_questions(controller))
+                show_answers_button.grid()
                 quit_button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno("Confirmation", message="Quit?")))
-                quit_button.grid()
+                quit_button.grid(row=3, column=2)
+
+        def show_questions(self, cont):
+                question_list = cont.show_answers()
+                print(question_list)
 
 quiz = RootFrame()
 quiz.geometry("500x300")
