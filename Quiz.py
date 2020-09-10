@@ -294,7 +294,11 @@ class RootFrame(tk.Tk):
                 i = len(self.frames) - 4
                 chosen_questions = []
                 while i > -1:
-                        chosen_questions.append([self.frames["QuestionPage" + str(i)].question_list[self.frames["QuestionPage" + str(i)].question_i]['question'],self.frames["QuestionPage" + str(i)].question_list[self.frames["QuestionPage" + str(i)].question_i]["answers"][self.frames["QuestionPage" + str(i)].question_list[self.frames["QuestionPage" + str(i)].question_i]["correct_answer"]],self.frames["QuestionPage" + str(i)].question_list[self.frames["QuestionPage" + str(i)].question_i]["answers"][self.frames["QuestionPage" + str(i)].chosen_answer]])
+                        question_page = self.frames["QuestionPage" + str(i)]
+                        question = question_page.question_list[question_page.question_i]['question']
+                        correct_answer = question_page.question_list[question_page.question_i]["answers"][question_page.question_list[question_page.question_i]["correct_answer"]]
+                        chosen_answer = question_page.question_list[question_page.question_i]["answers"][question_page.chosen_answer]
+                        chosen_questions.append([question,correct_answer,chosen_answer])
                         i = i - 1
                 return chosen_questions
 
@@ -311,7 +315,9 @@ class RootFrame(tk.Tk):
 
         def new_user(self, value):
                 if self.restart(value):
-                        self.users[self.current_user.get()].user_write()
+                        if self.current_user.get() != "":
+                                self.users[self.current_user.get()].user_write()
+                        self.current_user.set("")
                         self.show_frame(StartingPage)
         
         def quit(self, value):
@@ -420,7 +426,7 @@ class QuestionPage(tk.Frame):
 
                 back_button = ttk.Button(self, text="Back", command=lambda: controller.show_frame("QuestionPage" + str(number-1) if number != 0 else "QuestionPage" + str(number)))
                 back_button.grid(row=3, column=1)
-                skip_button = ttk.Button(self, text="Skip", command=lambda next_page=next_page: combine_funcs(controller.check_answer("", 0, score_modifier, self, end_number), controller.show_frame(next_page)))
+                skip_button = ttk.Button(self, text="Skip", command=lambda next_page=next_page: combine_funcs(controller.check_answer('0', 1, score_modifier, self, end_number), controller.show_frame(next_page)))
                 skip_button.grid(row=3, column=2)
                 popup_button = ttk.Button(self, text="Restart", command=lambda: controller.restart(tk.messagebox.askyesno("Confirmation", message="Restart?")))
                 popup_button.grid(row=5, column=0, sticky="e")
@@ -452,22 +458,17 @@ class EndPage(tk.Frame):
 
         def show_questions(self, cont):
                 answers_box = tk.Tk()
-                frame = tk.Frame(answers_box)
-                frame.pack(expand=True, fill="both")
+                scrollbar = tk.Scrollbar(answers_box)
+                scrollbar.pack(side="right", fill="y")
+                list_box = tk.Listbox(answers_box, yscrollcommand=scrollbar.set)
+                list_box.pack(expand=True, fill="both")
                 question_list = cont.show_answers()
-                print(question_list)
                 j=0
                 for i in question_list:
-                        ttk.Label(frame, text="Question: " + i[0]).grid(row=j, column=0)
-                        ttk.Label(frame, text="Correct Answer: " + i[1]).grid(row=j, column=1)
-                        ttk.Label(frame, text="Your Answer: " + i[2]).grid(row=j, column=2)
+                        list_box.insert(0, "Question: " + i[0] + ", Correct Answer: " + i[1] + ", Your Answer: " + i[2])
                         j+=1
-                row_column_configure(frame, j, 4)
-                scrollbar = tk.Scrollbar(frame)
-                scrollbar.grid(row=0, rowspan=j, column=4, sticky="ns")
-                frame.config(yscrollcommand=scrollbar.set)
-                scrollbar.config(command=frame.yview)
-                answers_box.geometry("400x500")
+                scrollbar.config(command=list_box.yview)
+                answers_box.geometry("400x300")
                 answers_box.resizable(False, False)
                 answers_box.mainloop()
 
