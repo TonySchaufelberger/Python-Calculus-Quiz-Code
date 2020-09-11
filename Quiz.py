@@ -152,7 +152,7 @@ class RootFrame(tk.Tk):
                                 user_sections = tk.StringVar(popup_box)
                                 user_sections.set(users[user]['sections'])
 
-                                delete_user = ttk.Button(popup_box, text="Remove User", command=lambda user=user: remove_user(users, user, json_file, tk.messagebox.askyesno("Confirmation", message="Remove User?")))
+                                delete_user = ttk.Button(popup_box, text="Remove Score", command=lambda user=user: remove_user(users, user, json_file, tk.messagebox.askyesno("Confirmation", message="Remove User?")))
                         
                                 name_label = ttk.Label(popup_box, text=user_name.get(), font=REGULAR_FONT)
                                 name_label.grid(row=i, column=0)
@@ -465,10 +465,16 @@ class EndPage(tk.Frame):
                 question_list = cont.show_answers()
                 j=0
                 for i in question_list:
-                        list_box.insert(0, "Question: " + i[0] + ", Correct Answer: " + i[1] + ", Your Answer: " + i[2])
+                        if i[1] == i[2]:
+                                answer_is = "Correct"
+                        else:
+                                answer_is = "Incorrect"
+                        list_box.insert(0, "")
+                        list_box.insert(0, "Correct answer: " + i[1] + ", Your answer: " + i[2])
+                        list_box.insert(0, "Question: " + i[0] + " " + answer_is)
                         j+=1
                 scrollbar.config(command=list_box.yview)
-                answers_box.geometry("400x300")
+                answers_box.geometry("600x200")
                 answers_box.resizable(False, False)
                 answers_box.mainloop()
 
