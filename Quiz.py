@@ -6,6 +6,12 @@ from tkinter import simpledialog, ttk
 LARGE_FONT = ("Verdana", 12)
 REGULAR_FONT = ("Verdana", 10)
 SMALL_FONT = ("Verdana", 8)
+LIGHT_THEME = {"COLOR_PRIMARY": "#f5f5f5"}
+DARK_THEME = {"COLOR_PRIMARY": "#000000"}
+COLOR_PRIMARY = "#f5f5f5"
+MAX_NAME_LENGTH = 16
+SPECIAL_CHARACTERS = ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "=", "`", "~", "<", ">",
+                      "/", "?", ";", "[", "]", "{", "}", "|", "\\", "'", '"', ",", "."]
 
 def combine_funcs(*funcs):
         """A function designed to return multiple functions for the tkinter button commands"""
@@ -25,6 +31,13 @@ def open_help():
 
 def help_callback(event):
         open_help()
+
+def check_name_entry(text):
+        # Stops name entry from allowing numbers or special characters
+        for letter in text:
+            if letter in SPECIAL_CHARACTERS or letter.isdigit() or len(text) > MAX_NAME_LENGTH:
+                return False
+        return True
 
 class UserData():
         """"""
@@ -63,10 +76,16 @@ class RootFrame(tk.Tk):
                 tk.Tk.__init__(self, *args, **kwargs)
                 tk.Tk.iconbitmap(self, default="")
                 tk.Tk.wm_title(self, "Level 3 Calculus Revision Quiz")
+                self.minsize(500, 300)
+                self.maxsize(1000, 600)
                 self.bind('<F1>', help_callback)
 
                 self.style = ttk.Style()
-                self.style.configure('TButton', font=SMALL_FONT)
+                self.style.configure('TButton', font=SMALL_FONT, background=COLOR_PRIMARY)
+                self.style.configure('TLabel', background=COLOR_PRIMARY)
+                self.style.configure('TMenubutton', font=SMALL_FONT, background=COLOR_PRIMARY)
+                self.style.configure('TCheckbutton', font=SMALL_FONT, background=COLOR_PRIMARY)
+                self.style.configure('TRadiobutton', font=SMALL_FONT, background=COLOR_PRIMARY)
 
                 topbar = tk.Frame(self)
                 topbar.pack(side="top", fill="both", expand=False)
@@ -113,6 +132,7 @@ class RootFrame(tk.Tk):
 
         def score_popup(self):
                 popup_box = tk.Tk()
+                tk.Tk.wm_title(popup_box, "Scoreboard")
 
                 def remove_user(dictionary, user, json_file, value):
                         if value:
@@ -328,17 +348,19 @@ class StartingPage(tk.Frame):
         """This page contains a next button to the selection page"""
         def __init__(self, parent, controller):
                 tk.Frame.__init__(self, parent)
+                self.config(bg=COLOR_PRIMARY)
                 row_column_configure(self, 3, 5)
                 label = ttk.Label(self, text="Welcome to NCEA Level 3 Calculus External Revision Quiz.", font=LARGE_FONT)
                 label.grid(row=0, column=0, columnspan=5)
 
                 name = tk.StringVar(controller)
-                year_list = (13, 12, 11, 10, 9)
-                year_dropdown = tk.OptionMenu(self, controller.year, *year_list)
+                year_list = (0, 13, 12, 11, 10, 9)
+                year_dropdown = ttk.OptionMenu(self, controller.year, *year_list)
                 year_dropdown.grid(row=1, column=4)
-                ttk.Label(self, text="Name:").grid(row=1, column=0)
-                ttk.Label(self, text="Year:").grid(row=1, column=3)
-                name_entry = ttk.Entry(self, background="grey", textvariable=name, font=REGULAR_FONT)
+                ttk.Label(self, text="Name:", font=REGULAR_FONT).grid(row=1, column=0)
+                ttk.Label(self, text="Year:", font=REGULAR_FONT).grid(row=1, column=3)
+                name_validation = self.register(check_name_entry)
+                name_entry = ttk.Entry(self, validate="all", validatecommand=(name_validation, "%P"), background="grey", textvariable=name, font=REGULAR_FONT)
                 name_entry.grid(row=1, column=1)
 
                 def save_name(saved_name):
@@ -361,9 +383,10 @@ class SelectionPage(tk.Frame):
         It toggles if the question_list will include complex, differentiation and/or integration, and whether it's separated by section"""
         def __init__(self, parent, controller):
                 tk.Frame.__init__(self, parent)
+                self.config(bg=COLOR_PRIMARY)
                 row_column_configure(self, 8, 4)
                 label = ttk.Label(self, text="Select which sections you want to test", font=LARGE_FONT)
-                label.grid(row=0, column=0, columnspan=4, sticky="nsew")
+                label.grid(row=0, column=1, columnspan=2, sticky="nsew")
 
                 complex_check = ttk.Checkbutton(self, text="Test Complex Numbers?", variable=controller.complex_test)
                 differentiation_check = ttk.Checkbutton(self, text="Test Differentiation?", variable=controller.differentiation_test)
@@ -386,6 +409,7 @@ class QuestionPage(tk.Frame):
         This question_list is generated based on the checkboxes the user checked before"""
         def __init__(self, parent, controller, number, question_i, score_modifier, end_number, question_list):
                 tk.Frame.__init__(self, parent)
+                self.config(bg=COLOR_PRIMARY)
                 self.number = number
                 self.question_list = question_list
                 self.question_i = question_i
@@ -416,7 +440,7 @@ class QuestionPage(tk.Frame):
                 I've put this into a for loop to make it easier to program"""
                 answer = {}
                 i, j = 0.6, 0
-                answers_frame = tk.Frame(self)
+                answers_frame = tk.Frame(self, background=COLOR_PRIMARY)
                 for letter in ['a','b','c','d']:
                         answer[letter] = ttk.Button(answers_frame, text=self.question_list[question_i]['answers'][letter], command=lambda letter=letter, correct_letter=self.question_list[question_i]["correct_answer"], next_page=next_page: combine_funcs(controller.check_answer(letter, correct_letter, score_modifier, self, end_number), controller.show_frame(next_page)))
                         answer[letter].grid(row=round(i), column=[1,2,1,2][j], pady=2, padx=2)
@@ -437,7 +461,8 @@ class EndPage(tk.Frame):
         """"""
         def __init__(self, parent, controller):
                 tk.Frame.__init__(self, parent)
-                row_column_configure(self, 4, 4)
+                self.config(bg=COLOR_PRIMARY)
+                row_column_configure(self, 4, 5)
 
                 user_title = ttk.Label(self, text="User: ", font=LARGE_FONT)
                 user_title.grid(row=0, column=1)
@@ -445,30 +470,31 @@ class EndPage(tk.Frame):
                 name_title.grid(row=0, column=2)
                 score_title = ttk.Label(self, text="End score: ", font=LARGE_FONT)
                 score_title.grid(pady=10,padx=10, row=1, column=1)
-                answers_correct = ttk.Label(self, textvariable=controller.score)
+                answers_correct = ttk.Label(self, textvariable=controller.score, font=LARGE_FONT)
                 answers_correct.grid(row=1, column=2)
                 grade = ttk.Label(self, textvariable=controller.grade, font=LARGE_FONT)
                 grade.grid(row=2, column=1, columnspan=2)
-                new_quiz_button = ttk.Button(self, text="Save user and start again?", command=lambda: controller.new_user(tk.messagebox.askyesno("Confirmation", message="Start a new quiz?")))
-                new_quiz_button.grid(row=3, column=1)
                 show_answers_button = ttk.Button(self, text="Show Answers", command=lambda: self.show_questions(controller))
-                show_answers_button.grid()
+                show_answers_button.grid(row=3, column=1, columnspan=2)
+                new_quiz_button = ttk.Button(self, text="Save user and start again?", command=lambda: controller.new_user(tk.messagebox.askyesno("Confirmation", message="Start a new quiz?")))
+                new_quiz_button.grid(row=4, column=1)
                 quit_button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno("Confirmation", message="Quit?")))
-                quit_button.grid(row=3, column=2)
+                quit_button.grid(row=4, column=2)
 
         def show_questions(self, cont):
                 answers_box = tk.Tk()
+                tk.Tk.wm_title(answers_box, "Answers")
                 scrollbar = tk.Scrollbar(answers_box)
                 scrollbar.pack(side="right", fill="y")
-                list_box = tk.Listbox(answers_box, yscrollcommand=scrollbar.set)
+                list_box = tk.Listbox(answers_box, yscrollcommand=scrollbar.set, font=REGULAR_FONT)
                 list_box.pack(expand=True, fill="both")
                 question_list = cont.show_answers()
                 j=0
                 for i in question_list:
                         if i[1] == i[2]:
-                                answer_is = "Correct"
+                                answer_is = "CORRECT"
                         else:
-                                answer_is = "Incorrect"
+                                answer_is = "INCORRECT"
                         list_box.insert(0, "")
                         list_box.insert(0, "Correct answer: " + i[1] + ", Your answer: " + i[2])
                         list_box.insert(0, "Question: " + i[0] + " " + answer_is)
@@ -479,5 +505,4 @@ class EndPage(tk.Frame):
                 answers_box.mainloop()
 
 quiz = RootFrame()
-quiz.geometry("500x300")
 quiz.mainloop()
