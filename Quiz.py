@@ -6,9 +6,10 @@ from tkinter import simpledialog, ttk
 LARGE_FONT = ("Verdana", 12)
 REGULAR_FONT = ("Verdana", 10)
 SMALL_FONT = ("Verdana", 8)
-LIGHT_THEME = {"COLOR_PRIMARY": "#f5f5f5"}
+LIGHT_THEME = {"COLOR_PRIMARY": "#fafafa"}
 DARK_THEME = {"COLOR_PRIMARY": "#000000"}
-COLOR_PRIMARY = "#f5f5f5"
+THEMING = (LIGHT_THEME, DARK_THEME)
+print(THEMING)
 MAX_NAME_LENGTH = 16
 SPECIAL_CHARACTERS = ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "=", "`", "~", "<", ">",
                       "/", "?", ";", "[", "]", "{", "}", "|", "\\", "'", '"', ",", "."]
@@ -80,19 +81,12 @@ class RootFrame(tk.Tk):
                 self.maxsize(1000, 600)
                 self.bind('<F1>', help_callback)
 
-                self.style = ttk.Style()
-                self.style.configure('TButton', font=SMALL_FONT, background=COLOR_PRIMARY)
-                self.style.configure('TLabel', background=COLOR_PRIMARY)
-                self.style.configure('TMenubutton', font=SMALL_FONT, background=COLOR_PRIMARY)
-                self.style.configure('TCheckbutton', font=SMALL_FONT, background=COLOR_PRIMARY)
-                self.style.configure('TRadiobutton', font=SMALL_FONT, background=COLOR_PRIMARY)
-
                 topbar = tk.Frame(self)
                 topbar.pack(side="top", fill="both", expand=False)
                 
                 menubar = tk.Menu(self)
                 filemenu = tk.Menu(menubar, tearoff=0)
-                filemenu.add_command(label="Options", font=SMALL_FONT)
+                filemenu.add_command(label="Options", command=lambda: self.options_popup(), font=SMALL_FONT)
                 filemenu.add_command(label="New User", command=lambda: self.new_user(tk.messagebox.askyesno("Confirmation", message="New User?")), font=SMALL_FONT)
                 menubar.add_cascade(label="File", menu=filemenu, font=SMALL_FONT)
                 scoremenu = tk.Menu(menubar, tearoff=0)
@@ -101,12 +95,16 @@ class RootFrame(tk.Tk):
                 menubar.add_command(label="(F1) Help", command=lambda: open_help(), font=SMALL_FONT)
                 self.config(menu=menubar)
 
+                self.style = ttk.Style()
+                self.theme_number = tk.IntVar(self, 0)
+                self.configure_theme()
+                
+
                 # I've converted container to self.container so I can access it in a different method
                 self.container = tk.Frame(self)
                 self.container.pack(side="top", fill="both", expand=True)
                 self.container.grid_rowconfigure(0, weight=1)
                 self.container.grid_columnconfigure(0, weight=1)
-
                 self.complex_test = tk.BooleanVar(self)
                 self.differentiation_test = tk.BooleanVar(self)
                 self.integration_test = tk.BooleanVar(self)
@@ -119,16 +117,46 @@ class RootFrame(tk.Tk):
                 self.current_user = tk.StringVar(self)
                 self.frames = {}
 
+                self.initialize_frames()
+
+                self.show_frame(StartingPage)
+
+        def initialize_frames(self):
                 for f in (StartingPage, SelectionPage, EndPage):
                         frame = f(self.container, self)
                         self.frames[f] = frame
                         frame.grid(row=0, column=0, sticky="nsew")
 
-                self.show_frame(StartingPage)
-
         def show_frame(self, cont):
                 frame = self.frames[cont]
                 frame.tkraise()
+
+        def options_popup(self):
+                options_box = tk.Tk()
+                tk.Tk.wm_title(options_box, "Options")
+
+                theme_options = {"": "", "Light Theme": 0, "Dark Theme": 1}
+                theme_name = tk.StringVar(self)
+                theme_menu = ttk.OptionMenu(options_box, theme_name, *theme_options.keys())
+                theme_menu.grid()
+                self.theme_number.set(theme_options[theme_name.get()])
+
+                def set_theme(value):
+                        print(theme_options[theme_name.get()])
+                        if value:
+                                self.initialize_frames()
+                                self.configure_theme()
+                                self.show_frame(StartingPage)
+        
+                theme_button = ttk.Button(options_box, text="Set Theme", command=lambda: set_theme(tk.messagebox.askyesno("Warning", message="Warning: this will restart the quiz and remove all progress. Proceed?")))
+                theme_button.grid()
+
+        def configure_theme(self):
+                self.style.configure('TButton', font=SMALL_FONT, background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
+                self.style.configure('TLabel', background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
+                self.style.configure('TMenubutton', font=SMALL_FONT, background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
+                self.style.configure('TCheckbutton', font=SMALL_FONT, background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
+                self.style.configure('TRadiobutton', font=SMALL_FONT, background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
 
         def score_popup(self):
                 popup_box = tk.Tk()
@@ -348,7 +376,7 @@ class StartingPage(tk.Frame):
         """This page contains a next button to the selection page"""
         def __init__(self, parent, controller):
                 tk.Frame.__init__(self, parent)
-                self.config(bg=COLOR_PRIMARY)
+                self.config(bg=THEMING[controller.theme_number.get()]["COLOR_PRIMARY"])
                 row_column_configure(self, 3, 5)
                 label = ttk.Label(self, text="Welcome to NCEA Level 3 Calculus External Revision Quiz.", font=LARGE_FONT)
                 label.grid(row=0, column=0, columnspan=5)
@@ -383,7 +411,7 @@ class SelectionPage(tk.Frame):
         It toggles if the question_list will include complex, differentiation and/or integration, and whether it's separated by section"""
         def __init__(self, parent, controller):
                 tk.Frame.__init__(self, parent)
-                self.config(bg=COLOR_PRIMARY)
+                self.config(bg=THEMING[controller.theme_number.get()]["COLOR_PRIMARY"])
                 row_column_configure(self, 8, 4)
                 label = ttk.Label(self, text="Select which sections you want to test", font=LARGE_FONT)
                 label.grid(row=0, column=1, columnspan=2, sticky="nsew")
@@ -409,7 +437,7 @@ class QuestionPage(tk.Frame):
         This question_list is generated based on the checkboxes the user checked before"""
         def __init__(self, parent, controller, number, question_i, score_modifier, end_number, question_list):
                 tk.Frame.__init__(self, parent)
-                self.config(bg=COLOR_PRIMARY)
+                self.config(bg=THEMING[controller.theme_number.get()]["COLOR_PRIMARY"])
                 self.number = number
                 self.question_list = question_list
                 self.question_i = question_i
@@ -440,7 +468,7 @@ class QuestionPage(tk.Frame):
                 I've put this into a for loop to make it easier to program"""
                 answer = {}
                 i, j = 0.6, 0
-                answers_frame = tk.Frame(self, background=COLOR_PRIMARY)
+                answers_frame = tk.Frame(self, background=THEMING[controller.theme_number.get()]["COLOR_PRIMARY"])
                 for letter in ['a','b','c','d']:
                         answer[letter] = ttk.Button(answers_frame, text=self.question_list[question_i]['answers'][letter], command=lambda letter=letter, correct_letter=self.question_list[question_i]["correct_answer"], next_page=next_page: combine_funcs(controller.check_answer(letter, correct_letter, score_modifier, self, end_number), controller.show_frame(next_page)))
                         answer[letter].grid(row=round(i), column=[1,2,1,2][j], pady=2, padx=2)
@@ -461,7 +489,7 @@ class EndPage(tk.Frame):
         """"""
         def __init__(self, parent, controller):
                 tk.Frame.__init__(self, parent)
-                self.config(bg=COLOR_PRIMARY)
+                self.config(bg=THEMING[controller.theme_number.get()]["COLOR_PRIMARY"])
                 row_column_configure(self, 4, 5)
 
                 user_title = ttk.Label(self, text="User: ", font=LARGE_FONT)
