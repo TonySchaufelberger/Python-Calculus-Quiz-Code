@@ -6,10 +6,9 @@ from tkinter import simpledialog, ttk
 LARGE_FONT = ("Verdana", 12)
 REGULAR_FONT = ("Verdana", 10)
 SMALL_FONT = ("Verdana", 8)
-LIGHT_THEME = {"COLOR_PRIMARY": "#fafafa"}
-DARK_THEME = {"COLOR_PRIMARY": "#000000"}
+LIGHT_THEME = {"COLOR_PRIMARY": "#fafafa", "color_font": "#000000"}
+DARK_THEME = {"COLOR_PRIMARY": "#000000", "color_font": "#ffffff"}
 THEMING = (LIGHT_THEME, DARK_THEME)
-print(THEMING)
 MAX_NAME_LENGTH = 16
 SPECIAL_CHARACTERS = ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "=", "`", "~", "<", ">",
                       "/", "?", ";", "[", "]", "{", "}", "|", "\\", "'", '"', ",", "."]
@@ -43,9 +42,10 @@ def check_name_entry(text):
 class UserData():
         """"""
 
-        def __init__(self, name, score=0, grade="Not Achieved", year=13, sections=["Not attempted"]):
+        def __init__(self, name, score=0, number_correct=0, grade="Not Achieved", year=13, sections=["Not attempted"]):
                 self.name = name
                 self.score = score
+                self.number_correct = number_correct
                 self.grade = grade
                 self.year = year
                 self.sections = sections
@@ -63,7 +63,7 @@ class UserData():
                                 original_name = "{}({})".format(self.name, i)
                                 i += 1
                         self.name = original_name
-                        user_data = {self.name: {"name": self.name, "score": self.score, "grade": self.grade, "year": self.year, "sections": ", ".join(self.sections)}}
+                        user_data = {self.name: {"name": self.name, "score": self.score, "number_correct": self.number_correct, "grade": self.grade, "year": self.year, "sections": ", ".join(self.sections)}}
                         dic["users"].update(user_data)
                         json_file.seek(0)
                         json.dump(dic, json_file, indent=4)
@@ -86,7 +86,10 @@ class RootFrame(tk.Tk):
                 
                 menubar = tk.Menu(self)
                 filemenu = tk.Menu(menubar, tearoff=0)
-                filemenu.add_command(label="Options", command=lambda: self.options_popup(), font=SMALL_FONT)
+                thememenu = tk.Menu(filemenu, tearoff=0)
+                filemenu.add_cascade(label="Themes", menu=thememenu, font=SMALL_FONT)
+                thememenu.add_command(label="Light Theme", command=lambda: self.set_theme(0))
+                thememenu.add_command(label="Dark Theme", command=lambda: self.set_theme(1))
                 filemenu.add_command(label="New User", command=lambda: self.new_user(tk.messagebox.askyesno("Confirmation", message="New User?")), font=SMALL_FONT)
                 menubar.add_cascade(label="File", menu=filemenu, font=SMALL_FONT)
                 scoremenu = tk.Menu(menubar, tearoff=0)
@@ -99,7 +102,6 @@ class RootFrame(tk.Tk):
                 self.theme_number = tk.IntVar(self, 0)
                 self.configure_theme()
                 
-
                 # I've converted container to self.container so I can access it in a different method
                 self.container = tk.Frame(self)
                 self.container.pack(side="top", fill="both", expand=True)
@@ -131,32 +133,19 @@ class RootFrame(tk.Tk):
                 frame = self.frames[cont]
                 frame.tkraise()
 
-        def options_popup(self):
-                options_box = tk.Tk()
-                tk.Tk.wm_title(options_box, "Options")
-
-                theme_options = {"": "", "Light Theme": 0, "Dark Theme": 1}
-                theme_name = tk.StringVar(self)
-                theme_menu = ttk.OptionMenu(options_box, theme_name, *theme_options.keys())
-                theme_menu.grid()
-                self.theme_number.set(theme_options[theme_name.get()])
-
-                def set_theme(value):
-                        print(theme_options[theme_name.get()])
-                        if value:
-                                self.initialize_frames()
-                                self.configure_theme()
-                                self.show_frame(StartingPage)
-        
-                theme_button = ttk.Button(options_box, text="Set Theme", command=lambda: set_theme(tk.messagebox.askyesno("Warning", message="Warning: this will restart the quiz and remove all progress. Proceed?")))
-                theme_button.grid()
+        def set_theme(self, theme_chosen_number):
+                if tk.messagebox.askyesno("Warning", message="Warning: this will restart the quiz and remove all progress. Proceed?"):
+                        self.theme_number.set(theme_chosen_number)
+                        self.initialize_frames()
+                        self.configure_theme()
+                        self.show_frame(StartingPage)
 
         def configure_theme(self):
                 self.style.configure('TButton', font=SMALL_FONT, background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
-                self.style.configure('TLabel', background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
-                self.style.configure('TMenubutton', font=SMALL_FONT, background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
-                self.style.configure('TCheckbutton', font=SMALL_FONT, background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
-                self.style.configure('TRadiobutton', font=SMALL_FONT, background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
+                self.style.configure('TLabel', foreground=THEMING[self.theme_number.get()]["color_font"], background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
+                self.style.configure('TMenubutton', font=SMALL_FONT, foreground=THEMING[self.theme_number.get()]["color_font"], background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
+                self.style.configure('TCheckbutton', font=SMALL_FONT, foreground=THEMING[self.theme_number.get()]["color_font"], background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
+                self.style.configure('TRadiobutton', font=SMALL_FONT, foreground=THEMING[self.theme_number.get()]["color_font"], background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
 
         def score_popup(self):
                 popup_box = tk.Tk()
@@ -177,14 +166,16 @@ class RootFrame(tk.Tk):
                 i = 1
                 name_title = ttk.Label(popup_box, text="Name", font=LARGE_FONT)
                 score_title = ttk.Label(popup_box, text="Score", font=LARGE_FONT)
+                correct_title = ttk.Label(popup_box, text="Number Correct", font=LARGE_FONT)
                 grade_title = ttk.Label(popup_box, text="Grade", font=LARGE_FONT)
                 year_title = ttk.Label(popup_box, text="Year", font=LARGE_FONT)
                 sections_title = ttk.Label(popup_box, text="Sections", font=LARGE_FONT)
                 name_title.grid(row=0, column=0)
                 score_title.grid(row=0, column=1)
-                grade_title.grid(row=0, column=2)
-                year_title.grid(row=0, column=3)
-                sections_title.grid(row=0, column=4)
+                correct_title.grid(row=0, column=2)
+                grade_title.grid(row=0, column=3)
+                year_title.grid(row=0, column=4)
+                sections_title.grid(row=0, column=5)
                 with open("user_data.json", "r+") as json_file:
                         data = json.load(json_file)
                         users = {k : v for k, v in sorted(data['users'].items())}
@@ -193,6 +184,8 @@ class RootFrame(tk.Tk):
                                 user_name.set(users[user]['name'])
                                 user_score = tk.IntVar(popup_box)
                                 user_score.set(users[user]['score'])
+                                user_correct = tk.IntVar(popup_box)
+                                user_correct.set(users[user]['number_correct'])
                                 user_grade = tk.StringVar(popup_box)
                                 user_grade.set(users[user]['grade'])
                                 user_year = tk.IntVar(popup_box)
@@ -206,13 +199,15 @@ class RootFrame(tk.Tk):
                                 name_label.grid(row=i, column=0)
                                 score_label = ttk.Label(popup_box, text=user_score.get(), font=REGULAR_FONT)
                                 score_label.grid(row=i, column=1)
+                                score_label = ttk.Label(popup_box, text=user_correct.get(), font=REGULAR_FONT)
+                                score_label.grid(row=i, column=2)
                                 grade_label = ttk.Label(popup_box, text=user_grade.get(), font=REGULAR_FONT)
-                                grade_label.grid(row=i, column=2)
+                                grade_label.grid(row=i, column=3)
                                 year_label = ttk.Label(popup_box, text=user_year.get(), font=REGULAR_FONT)
-                                year_label.grid(row=i, column=3)
+                                year_label.grid(row=i, column=4)
                                 sections_label = ttk.Label(popup_box, text=user_sections.get(), font=REGULAR_FONT)
-                                sections_label.grid(row=i, column=4)
-                                delete_user.grid(row=i, column=5)
+                                sections_label.grid(row=i, column=5)
+                                delete_user.grid(row=i, column=6)
                         
                                 i += 1
                 row_column_configure(popup_box, i, 6)
@@ -308,9 +303,11 @@ class RootFrame(tk.Tk):
                 number_correct = 0
                 for i in self.frames:
                         if isinstance(i, str):
-                                current_score += self.score.get()+self.frames[i].score
-                                self.number_correct.set(self.frames[i].score)
+                                current_score += self.frames[i].score
+                                number_correct += self.frames[i].correct
                 self.users[self.current_user.get()].score = current_score
+                self.users[self.current_user.get()].number_correct = number_correct
+                self.number_correct.set(number_correct)
                 self.score.set(current_score)
 
                 if self.users[self.current_user.get()].score < (0.2 * len(self.users[self.current_user.get()].sections) * 20) or self.users[self.current_user.get()].score == 0:
@@ -490,7 +487,7 @@ class EndPage(tk.Frame):
         def __init__(self, parent, controller):
                 tk.Frame.__init__(self, parent)
                 self.config(bg=THEMING[controller.theme_number.get()]["COLOR_PRIMARY"])
-                row_column_configure(self, 4, 5)
+                row_column_configure(self, 5, 5)
 
                 user_title = ttk.Label(self, text="User: ", font=LARGE_FONT)
                 user_title.grid(row=0, column=1)
@@ -498,16 +495,20 @@ class EndPage(tk.Frame):
                 name_title.grid(row=0, column=2)
                 score_title = ttk.Label(self, text="End score: ", font=LARGE_FONT)
                 score_title.grid(pady=10,padx=10, row=1, column=1)
-                answers_correct = ttk.Label(self, textvariable=controller.score, font=LARGE_FONT)
-                answers_correct.grid(row=1, column=2)
+                final_score = ttk.Label(self, textvariable=controller.score, font=LARGE_FONT)
+                final_score.grid(row=1, column=2)
+                number_correct_title = ttk.Label(self, text="Number Correct: ", font=LARGE_FONT)
+                number_correct_title.grid(row=2, column=1)
+                number_correct = ttk.Label(self, textvariable=controller.number_correct, font=LARGE_FONT)
+                number_correct.grid(row=2, column=2)
                 grade = ttk.Label(self, textvariable=controller.grade, font=LARGE_FONT)
-                grade.grid(row=2, column=1, columnspan=2)
+                grade.grid(row=3, column=1, columnspan=2)
                 show_answers_button = ttk.Button(self, text="Show Answers", command=lambda: self.show_questions(controller))
-                show_answers_button.grid(row=3, column=1, columnspan=2)
+                show_answers_button.grid(row=4, column=1, columnspan=2)
                 new_quiz_button = ttk.Button(self, text="Save user and start again?", command=lambda: controller.new_user(tk.messagebox.askyesno("Confirmation", message="Start a new quiz?")))
-                new_quiz_button.grid(row=4, column=1)
+                new_quiz_button.grid(row=5, column=1)
                 quit_button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno("Confirmation", message="Quit?")))
-                quit_button.grid(row=4, column=2)
+                quit_button.grid(row=5, column=2)
 
         def show_questions(self, cont):
                 answers_box = tk.Tk()
