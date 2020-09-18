@@ -43,6 +43,7 @@ class UserData():
         """"""
 
         def __init__(self, name, score=0, number_correct=0, grade="Not Achieved", year=13, sections=["Not attempted"]):
+                # Stores each user with selected variables
                 self.name = name
                 self.score = score
                 self.number_correct = number_correct
@@ -54,11 +55,13 @@ class UserData():
                 self.question = 0
 
         def user_write(self):
+                # Writes the user to the json file by converting the json into a python dictionary, appending the user and then rewriting the json
                 with open("user_data.json", "r+") as json_file:
                         dic = json.load(json_file)
                         i = 2
                         original_name = self.name
                         while original_name in dic["users"]:
+                                # Makes it so that repeated names are valid
                                 original_name = self.name
                                 original_name = "{}({})".format(self.name, i)
                                 i += 1
@@ -83,15 +86,22 @@ class RootFrame(tk.Tk):
 
                 topbar = tk.Frame(self)
                 topbar.pack(side="top", fill="both", expand=False)
-                
-                menubar = tk.Menu(self)
+
+                # Menubar is for file, scoreboard, options and help access
+                menubar = tk.Menu(topbar)
                 filemenu = tk.Menu(menubar, tearoff=0)
+                filemenu.add_command(label="New User", command=lambda: self.new_user(tk.messagebox.askyesno("Confirmation", message="New User?")), font=SMALL_FONT)
+                self.load_user = tk.Menu(filemenu, tearoff=0)
+                filemenu.add_cascade(label="Load User", menu=self.load_user, font=SMALL_FONT)
+                self.load_user_set()
+                                
+                menubar.add_cascade(label="File", menu=filemenu, font=SMALL_FONT)
+                optionmenu = tk.Menu(menubar, tearoff=0)
                 thememenu = tk.Menu(filemenu, tearoff=0)
-                filemenu.add_cascade(label="Themes", menu=thememenu, font=SMALL_FONT)
                 thememenu.add_command(label="Light Theme", command=lambda: self.set_theme(0))
                 thememenu.add_command(label="Dark Theme", command=lambda: self.set_theme(1))
-                filemenu.add_command(label="New User", command=lambda: self.new_user(tk.messagebox.askyesno("Confirmation", message="New User?")), font=SMALL_FONT)
-                menubar.add_cascade(label="File", menu=filemenu, font=SMALL_FONT)
+                optionmenu.add_cascade(label="Themes", menu=thememenu, font=SMALL_FONT)
+                menubar.add_cascade(label="Options", menu=optionmenu, font=SMALL_FONT)
                 scoremenu = tk.Menu(menubar, tearoff=0)
                 scoremenu.add_command(label="Show Scores", command=lambda: self.score_popup(), font=SMALL_FONT)
                 menubar.add_cascade(label="Scoreboards", menu=scoremenu, font=SMALL_FONT)
@@ -140,6 +150,17 @@ class RootFrame(tk.Tk):
                         self.configure_theme()
                         self.show_frame(StartingPage)
 
+        def load_user_set(self, new_user=None):
+                with open("user_data.json", "r+") as json_file:
+                        data = json.load(json_file)
+                        users = {k : v for k, v in sorted(data['users'].items())}
+                        if bool(users):
+                                if new_user != None:
+                                        for i in range(len(users)-1):
+                                                self.load_user.delete([user for user in users if user!=new_user][i])
+                                for user in users:
+                                        self.load_user.add_command(label=user)
+
         def configure_theme(self):
                 self.style.configure('TButton', font=SMALL_FONT, background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
                 self.style.configure('TLabel', foreground=THEMING[self.theme_number.get()]["color_font"], background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
@@ -151,13 +172,17 @@ class RootFrame(tk.Tk):
                 popup_box = tk.Tk()
                 tk.Tk.wm_title(popup_box, "Scoreboard")
 
-                def remove_user(dictionary, user, json_file, value):
+                def remove_user(dictionary, user, json_file, value, reset_all=False):
+                        # This function removes the selected user by remaking the entire list without the selected user
+                        # If everything needs to be reset, the reset_all parameter is on
                         if value:
                                 json_file.close()
                                 with open("user_data.json", "w") as json_file_write:
                                         new_dictionary = {i:dictionary[i] for i in dictionary if i!=user}
                                         json_file_write.seek(0)
                                         new_data = {'users': new_dictionary}
+                                        if reset_all:
+                                                new_data = {'users': {}}
                                         json.dump(new_data, json_file_write, indent=4)
                                         json_file_write.close()
                                 popup_box.destroy()
@@ -179,7 +204,10 @@ class RootFrame(tk.Tk):
                 with open("user_data.json", "r+") as json_file:
                         data = json.load(json_file)
                         users = {k : v for k, v in sorted(data['users'].items())}
+                        reset_button = ttk.Button(popup_box, text="Reset All", command=lambda: remove_user(users, "", json_file, tk.messagebox.askyesno("Confirmation", message="Reset all Users?"), True))
+                        reset_button.grid(row=0, column=6)
                         for user in users:
+                                # For each user, define their values and show them.
                                 user_name = tk.StringVar(popup_box)
                                 user_name.set(users[user]['name'])
                                 user_score = tk.IntVar(popup_box)
@@ -192,9 +220,7 @@ class RootFrame(tk.Tk):
                                 user_year.set(users[user]['year'])
                                 user_sections = tk.StringVar(popup_box)
                                 user_sections.set(users[user]['sections'])
-
                                 delete_user = ttk.Button(popup_box, text="Remove Score", command=lambda user=user: remove_user(users, user, json_file, tk.messagebox.askyesno("Confirmation", message="Remove User?")))
-                        
                                 name_label = ttk.Label(popup_box, text=user_name.get(), font=REGULAR_FONT)
                                 name_label.grid(row=i, column=0)
                                 score_label = ttk.Label(popup_box, text=user_score.get(), font=REGULAR_FONT)
@@ -208,7 +234,6 @@ class RootFrame(tk.Tk):
                                 sections_label = ttk.Label(popup_box, text=user_sections.get(), font=REGULAR_FONT)
                                 sections_label.grid(row=i, column=5)
                                 delete_user.grid(row=i, column=6)
-                        
                                 i += 1
                 row_column_configure(popup_box, i, 6)
                 popup_box.geometry("800x"+str(50*i))
@@ -225,9 +250,7 @@ class RootFrame(tk.Tk):
                 # The question_i variable is reset when there is a change in difficulty
                 question_i = 0
                 for question in range(length):
-
                         difficulty_before = difficulty
-
                         """The 'i' variable is used to determine which question list the question is taken from.
                         When sections are off, it's random. When they are on, it is in order."""
                         if self.section_check.get() == False:
@@ -362,6 +385,7 @@ class RootFrame(tk.Tk):
                 if self.restart(value):
                         if self.current_user.get() != "":
                                 self.users[self.current_user.get()].user_write()
+                                self.load_user_set(self.current_user.get())
                         self.current_user.set("")
                         self.show_frame(StartingPage)
         
