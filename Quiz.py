@@ -2,12 +2,43 @@ from variables import *
 import math, random, json, webbrowser
 import tkinter as tk
 from tkinter import simpledialog, ttk
+from ctypes import windll, byref, create_unicode_buffer, create_string_buffer
+# Code sourced from https://github.com/ifwe/digsby/blob/f5fe00244744aa131e07f09348d10563f3d8fa99/digsby/src/gui/native/win/winfonts.py#L15
+FR_PRIVATE  = 0x10
+FR_NOT_ENUM = 0x20
 
-LARGE_FONT = ("Verdana", 12)
-REGULAR_FONT = ("Verdana", 10)
-SMALL_FONT = ("Verdana", 8)
+def loadfont(fontpath, private=True, enumerable=False):
+    '''
+    Makes fonts located in file `fontpath` available to the font system.
+
+    `private`     if True, other processes cannot see this font, and this 
+                  font will be unloaded when the process dies
+    `enumerable`  if True, this font will appear when enumerating fonts
+
+    See https://msdn.microsoft.com/en-us/library/dd183327(VS.85).aspx
+
+    '''
+    if isinstance(fontpath, bytes):
+        pathbuf = create_string_buffer(fontpath)
+        AddFontResourceEx = windll.gdi32.AddFontResourceExA
+    elif isinstance(fontpath, str):
+        pathbuf = create_unicode_buffer(fontpath)
+        AddFontResourceEx = windll.gdi32.AddFontResourceExW
+    else:
+        raise TypeError('fontpath must be of type str or unicode')
+
+    flags = (FR_PRIVATE if private else 0) | (FR_NOT_ENUM if not enumerable else 0)
+    numFontsAdded = AddFontResourceEx(byref(pathbuf), flags, 0)
+    return bool(numFontsAdded)
+
+loadfont("Montserrat-Regular.ttf")
+loadfont("Roboto-Regular.ttf")
+
+LARGE_FONT = ("Roboto", 12)
+REGULAR_FONT = ("Montserrat Regular", 10)
+SMALL_FONT = ("Montserrat Regular", 8)
 LIGHT_THEME = {"COLOR_PRIMARY": "#fafafa", "color_font": "#000000"}
-DARK_THEME = {"COLOR_PRIMARY": "#000000", "color_font": "#ffffff"}
+DARK_THEME = {"COLOR_PRIMARY": "#121212", "color_font": "#6695ed"}
 THEMING = (LIGHT_THEME, DARK_THEME)
 MAX_NAME_LENGTH = 16
 SPECIAL_CHARACTERS = ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "=", "`", "~", "<", ">",
@@ -110,13 +141,12 @@ class RootFrame(tk.Tk):
 
                 self.style = ttk.Style()
                 self.theme_number = tk.IntVar(self, 0)
-                self.configure_theme()
                 
                 # I've converted container to self.container so I can access it in a different method
                 self.container = tk.Frame(self)
                 self.container.pack(side="top", fill="both", expand=True)
-                self.container.grid_rowconfigure(0, weight=1)
-                self.container.grid_columnconfigure(0, weight=1)
+                self.configure_theme()
+                row_column_configure(self.container, 1, 1)
                 self.complex_test = tk.BooleanVar(self)
                 self.differentiation_test = tk.BooleanVar(self)
                 self.integration_test = tk.BooleanVar(self)
@@ -167,6 +197,7 @@ class RootFrame(tk.Tk):
                 self.style.configure('TMenubutton', font=SMALL_FONT, foreground=THEMING[self.theme_number.get()]["color_font"], background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
                 self.style.configure('TCheckbutton', font=SMALL_FONT, foreground=THEMING[self.theme_number.get()]["color_font"], background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
                 self.style.configure('TRadiobutton', font=SMALL_FONT, foreground=THEMING[self.theme_number.get()]["color_font"], background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
+                self.container.config(bg=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
 
         def score_popup(self):
                 popup_box = tk.Tk()
@@ -399,17 +430,24 @@ class StartingPage(tk.Frame):
                 tk.Frame.__init__(self, parent)
                 self.config(bg=THEMING[controller.theme_number.get()]["COLOR_PRIMARY"])
                 row_column_configure(self, 3, 5)
-                label = ttk.Label(self, text="Welcome to NCEA Level 3 Calculus External Revision Quiz.", font=LARGE_FONT)
+                top_frame = tk.Frame(self, bg=THEMING[controller.theme_number.get()]["COLOR_PRIMARY"])
+                row_column_configure(top_frame, 1, 1)
+                top_frame.pack(fill="both", expand=True, padx=5, pady=10)
+                label = ttk.Label(top_frame, text="Welcome to NCEA Level 3 Calculus External Revision Quiz.", font=LARGE_FONT)
                 label.grid(row=0, column=0, columnspan=5)
 
+                bottom_frame = tk.Frame(self)
+                bottom_frame.pack(fill="both", expand=True)
                 name = tk.StringVar(controller)
                 year_list = (0, 13, 12, 11, 10, 9)
-                year_dropdown = ttk.OptionMenu(self, controller.year, *year_list)
+                year_dropdown = ttk.OptionMenu(bottom_frame, controller.year, *year_list)
                 year_dropdown.grid(row=1, column=4)
-                ttk.Label(self, text="Name:", font=REGULAR_FONT).grid(row=1, column=0)
-                ttk.Label(self, text="Year:", font=REGULAR_FONT).grid(row=1, column=3)
+                name_title = ttk.Label(bottom_frame, text="Name:", font=REGULAR_FONT)
+                name_title.grid(row=1, column=0)
+                year_title = ttk.Label(bottom_frame, text="Year:", font=REGULAR_FONT)
+                year_title.grid(row=1, column=3)
                 name_validation = self.register(check_name_entry)
-                name_entry = ttk.Entry(self, validate="all", validatecommand=(name_validation, "%P"), background="grey", textvariable=name, font=REGULAR_FONT)
+                name_entry = ttk.Entry(bottom_frame, validate="all", validatecommand=(name_validation, "%P"), background="grey", textvariable=name, font=REGULAR_FONT)
                 name_entry.grid(row=1, column=1)
 
                 def save_name(saved_name):
@@ -422,9 +460,9 @@ class StartingPage(tk.Frame):
                                 saved_name.set("")
                                 controller.show_frame(SelectionPage)
 
-                next_button = ttk.Button(self, text="Next", command=lambda: save_name(name))
+                next_button = ttk.Button(bottom_frame, text="Next", command=lambda: save_name(name))
                 next_button.grid(row=2, column=4)
-                button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno("Confirmation", message="Quit?")))
+                button = ttk.Button(bottom_frame, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno("Confirmation", message="Quit?")))
                 button.grid(row=2, column=0)
 
 class SelectionPage(tk.Frame):
