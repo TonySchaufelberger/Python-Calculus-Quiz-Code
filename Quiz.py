@@ -39,6 +39,8 @@ REGULAR_FONT = ("Montserrat Regular", 10)
 SMALL_FONT = ("Montserrat Regular", 8)
 LIGHT_THEME = {"COLOR_PRIMARY": "#fafafa", "color_font": "#000000"}
 DARK_THEME = {"COLOR_PRIMARY": "#121212", "color_font": "#6695ed"}
+CORRECT_COLOUR = "#91f78f"
+INCORRECT_COLOUR = "#f77c7c"
 THEMING = (LIGHT_THEME, DARK_THEME)
 MAX_NAME_LENGTH = 16
 SPECIAL_CHARACTERS = ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "=", "`", "~", "<", ">",
@@ -123,8 +125,8 @@ class RootFrame(tk.Tk):
                 filemenu = tk.Menu(menubar, tearoff=0)
                 filemenu.add_command(label="New User", command=lambda: self.new_user(tk.messagebox.askyesno("Confirmation", message="New User?")), font=SMALL_FONT)
                 self.load_user = tk.Menu(filemenu, tearoff=0)
-                filemenu.add_cascade(label="Load User", menu=self.load_user, font=SMALL_FONT)
-                self.load_user_set()
+                filemenu.add_cascade(label="Load User", menu=self.load_user, font=SMALL_FONT, state=tk.DISABLED)
+                #self.load_user_set()
                                 
                 menubar.add_cascade(label="File", menu=filemenu, font=SMALL_FONT)
                 optionmenu = tk.Menu(menubar, tearoff=0)
@@ -144,7 +146,7 @@ class RootFrame(tk.Tk):
                 
                 # I've converted container to self.container so I can access it in a different method
                 self.container = tk.Frame(self)
-                self.container.pack(side="top", fill="both", expand=True)
+                self.container.pack(side="right", fill="both", expand=True)
                 self.configure_theme()
                 row_column_configure(self.container, 1, 1)
                 self.complex_test = tk.BooleanVar(self)
@@ -156,6 +158,7 @@ class RootFrame(tk.Tk):
                 self.grade = tk.StringVar(self, "Not Attempted")
                 self.year = tk.IntVar(self, 13)
                 self.users = {}
+                self.user_saved = False
                 self.current_user = tk.StringVar(self)
                 self.frames = {}
 
@@ -180,7 +183,7 @@ class RootFrame(tk.Tk):
                         self.configure_theme()
                         self.show_frame(StartingPage)
 
-        def load_user_set(self, new_user=None):
+        """def load_user_set(self, new_user=None):
                 with open("user_data.json", "r+") as json_file:
                         data = json.load(json_file)
                         users = {k : v for k, v in sorted(data['users'].items())}
@@ -189,7 +192,7 @@ class RootFrame(tk.Tk):
                                         for i in range(len(users)-1):
                                                 self.load_user.delete([user for user in users if user!=new_user][i])
                                 for user in users:
-                                        self.load_user.add_command(label=user)
+                                        self.load_user.add_command(label=user)"""
 
         def configure_theme(self):
                 self.style.configure('TButton', font=SMALL_FONT, background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
@@ -273,8 +276,17 @@ class RootFrame(tk.Tk):
 
         def generate_quiz(self, *question_lists):
                 """This method is the same as the for loop in the __init__, except it passes each question as its own instance
-                It takes from a quesiton_list generated from the types of question chosen by the user"""
+                It takes from a question_list generated from the types of question chosen by the user"""
+                self.checkbox_frame = tk.Frame(self, bg='blue')
+                self.checkbox_frame.pack(expand=True, side="left", fill='both')
+                self.checkbox_questions = {}
+                
                 length, section_length = len(question_lists[0])*10, 10
+                for question in range(length):
+                    # Initialize checkboxes
+                    self.checkbox_questions[str(question+1)] = tk.BooleanVar(self, False)
+                    checkbutton = ttk.Checkbutton(self.checkbox_frame, variable=self.checkbox_questions[str(question+1)], state=tk.DISABLED)
+                    checkbutton.grid(row=question, column=0)
                 difficulty, difficulty_before = "easy", ""
                 new_list = [{"easy": [], "medium": [], "hard": []}, {"easy": [], "medium": [], "hard": []}, {"easy": [], "medium": [], "hard": []}]
                 modifier = 1
@@ -324,7 +336,7 @@ class RootFrame(tk.Tk):
                                 # When there are no sections, disable question_i functionality
                                 question_i = len(new_list[i_2][difficulty]) - 1
 
-                        frame = QuestionPage(self.container, self, question, question_i, score_modifier, length, new_list[i_2][difficulty])
+                        frame = QuestionPage(self.container, self, question, question_i, score_modifier, length, new_list[i_2][difficulty], self.checkbox_questions[str(question+1)])
                         self.frames["QuestionPage" + str(question)] = frame
                         frame.grid(row=0, column=0, sticky="nsew")
 
@@ -338,16 +350,18 @@ class RootFrame(tk.Tk):
                         self.generate_quiz(section_list)
                         self.show_frame("QuestionPage0")
 
-        def check_answer(self, answer, correct_answer, score_modifier, page, end_number):
+        def check_answer(self, answer, correct_answer, score_modifier, page, end_number, checkbox_item):
                 """Checks if the answer selected by a button is correct"""
                 self.users[self.current_user.get()].question = page.number
                 page.chosen_answer = answer
                 if answer == correct_answer:
                         page.score = 1 * score_modifier
                         page.correct += 1
+                        checkbox_item.set(True)
                 else:
                         page.score = 0
                         page.correct = 0
+                        checkbox_item.set(False)
                 if self.users[self.current_user.get()].question == end_number - 1:
                         self.check_score()
                         self.show_answers()
@@ -368,11 +382,13 @@ class RootFrame(tk.Tk):
                         self.grade.set("Not Achieved")
                 elif self.users[self.current_user.get()].score < (0.4 * len(self.users[self.current_user.get()].sections) * 20):
                         self.grade.set("Achieved")
-                elif self.users[self.current_user.get()].score < (0.8 * len(self.users[self.current_user.get()].sections) * 20):
+                elif self.users[self.current_user.get()].score < (0.7 * len(self.users[self.current_user.get()].sections) * 20):
                         self.grade.set("Merit")
                 else:
                         self.grade.set("Excellence")
                 self.users[self.current_user.get()].grade = self.grade.get()
+                self.checkbox_frame.pack_forget()
+                self.save_user()
 
         def check_section(self):
                 sections = []
@@ -412,11 +428,17 @@ class RootFrame(tk.Tk):
                         self.show_frame(SelectionPage)
                         return True
 
+        def save_user(self):
+                if self.current_user.get() != "" and self.user_saved == False:
+                        self.users[self.current_user.get()].user_write()
+                        #self.load_user_set(self.current_user.get())
+                        self.user_saved = True
+            
+
         def new_user(self, value):
                 if self.restart(value):
-                        if self.current_user.get() != "":
-                                self.users[self.current_user.get()].user_write()
-                                self.load_user_set(self.current_user.get())
+                        self.save_user()
+                        self.user_saved = False
                         self.current_user.set("")
                         self.show_frame(StartingPage)
         
@@ -494,7 +516,7 @@ class QuestionPage(tk.Frame):
         There will always be multiple instances of this object
         For each instance of a QuestionPage, the number increments by one, which takes the next question in the question_list
         This question_list is generated based on the checkboxes the user checked before"""
-        def __init__(self, parent, controller, number, question_i, score_modifier, end_number, question_list):
+        def __init__(self, parent, controller, number, question_i, score_modifier, end_number, question_list, checkbox_item):
                 tk.Frame.__init__(self, parent)
                 self.config(bg=THEMING[controller.theme_number.get()]["COLOR_PRIMARY"])
                 self.number = number
@@ -510,8 +532,8 @@ class QuestionPage(tk.Frame):
                 user_label.grid(row=0, rowspan=2, column=3)
 
                 self.score = 0
-                self.correct=0
-                self.chosen_answer=""
+                self.correct = 0
+                self.chosen_answer = ""
 
                 """Essentially, each question is index 0 of the shuffled list. At the end, this index is deleted, so that old index 1 becomes index 0.
                 This way, no question is repeated."""
@@ -529,7 +551,7 @@ class QuestionPage(tk.Frame):
                 i, j = 0.6, 0
                 answers_frame = tk.Frame(self, background=THEMING[controller.theme_number.get()]["COLOR_PRIMARY"])
                 for letter in ['a','b','c','d']:
-                        answer[letter] = ttk.Button(answers_frame, text=self.question_list[question_i]['answers'][letter], command=lambda letter=letter, correct_letter=self.question_list[question_i]["correct_answer"], next_page=next_page: combine_funcs(controller.check_answer(letter, correct_letter, score_modifier, self, end_number), controller.show_frame(next_page)))
+                        answer[letter] = ttk.Button(answers_frame, text=self.question_list[question_i]['answers'][letter], command=lambda letter=letter, correct_letter=self.question_list[question_i]["correct_answer"], next_page=next_page: combine_funcs(controller.check_answer(letter, correct_letter, score_modifier, self, end_number, checkbox_item), controller.show_frame(next_page)))
                         answer[letter].grid(row=round(i), column=[1,2,1,2][j], pady=2, padx=2)
                         i += 0.5
                         j += 1
@@ -537,7 +559,7 @@ class QuestionPage(tk.Frame):
 
                 back_button = ttk.Button(self, text="Back", command=lambda: controller.show_frame("QuestionPage" + str(number-1) if number != 0 else "QuestionPage" + str(number)))
                 back_button.grid(row=3, column=1)
-                skip_button = ttk.Button(self, text="Skip", command=lambda next_page=next_page: combine_funcs(controller.check_answer('0', 1, score_modifier, self, end_number), controller.show_frame(next_page)))
+                skip_button = ttk.Button(self, text="Skip", command=lambda next_page=next_page: combine_funcs(controller.check_answer('0', 1, score_modifier, self, end_number, checkbox_item), controller.show_frame(next_page)))
                 skip_button.grid(row=3, column=2)
                 popup_button = ttk.Button(self, text="Restart", command=lambda: controller.restart(tk.messagebox.askyesno("Confirmation", message="Restart?")))
                 popup_button.grid(row=5, column=0, sticky="e")
@@ -584,11 +606,15 @@ class EndPage(tk.Frame):
                 for i in question_list:
                         if i[1] == i[2]:
                                 answer_is = "CORRECT"
+                                colour = CORRECT_COLOUR
                         else:
                                 answer_is = "INCORRECT"
+                                colour = INCORRECT_COLOUR
                         list_box.insert(0, "")
                         list_box.insert(0, "Correct answer: " + i[1] + ", Your answer: " + i[2])
+                        list_box.itemconfig(0, {'bg': colour})
                         list_box.insert(0, "Question: " + i[0] + " " + answer_is)
+                        list_box.itemconfig(0, {'bg': colour})
                         j+=1
                 scrollbar.config(command=list_box.yview)
                 answers_box.geometry("600x200")
