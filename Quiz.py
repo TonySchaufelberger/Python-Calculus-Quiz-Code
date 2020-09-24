@@ -283,10 +283,17 @@ class RootFrame(tk.Tk):
                 
                 length, section_length = len(question_lists[0])*10, 10
                 for question in range(length):
-                    # Initialize checkboxes
-                    self.checkbox_questions[str(question+1)] = tk.BooleanVar(self, False)
-                    checkbutton = ttk.Checkbutton(self.checkbox_frame, variable=self.checkbox_questions[str(question+1)], state=tk.DISABLED)
-                    checkbutton.grid(row=question, column=0)
+                        # Initialize checkboxes
+                        self.checkbox_questions[str(question+1)] = tk.StringVar(self, "Not Completed")
+                        question_label = ttk.Button(self.checkbox_frame, text="Question " + str(question+1), command=lambda question=question: self.show_frame("QuestionPage"+str(question)))
+                        question_label.grid(row=question, column=0)
+                        
+                        check_label = ttk.Label(self.checkbox_frame, textvariable=self.checkbox_questions[str(question+1)])
+                        check_label.grid(row=question, column=1)
+                self.done_label = ttk.Label(self.checkbox_frame, text="Please answer all questions to end the quiz.")
+                self.done_label.grid(row=length+2, column=0, columnspan=2)
+                self.confirm_button = ttk.Button(self.checkbox_frame, text="Confirm", command=lambda: self.end_quiz(), state=tk.DISABLED)
+                self.confirm_button.grid(row=length+1, column=0, columnspan=2)
                 difficulty, difficulty_before = "easy", ""
                 new_list = [{"easy": [], "medium": [], "hard": []}, {"easy": [], "medium": [], "hard": []}, {"easy": [], "medium": [], "hard": []}]
                 modifier = 1
@@ -350,21 +357,30 @@ class RootFrame(tk.Tk):
                         self.generate_quiz(section_list)
                         self.show_frame("QuestionPage0")
 
+        def end_quiz(self):
+                self.check_score()
+                self.show_answers()
+                self.show_frame(EndPage)
+
         def check_answer(self, answer, correct_answer, score_modifier, page, end_number, checkbox_item):
                 """Checks if the answer selected by a button is correct"""
                 self.users[self.current_user.get()].question = page.number
                 page.chosen_answer = answer
+                checkbox_item.set("Skipped")
+                if page.chosen_answer != "0":
+                        checkbox_item.set("Answered")
                 if answer == correct_answer:
                         page.score = 1 * score_modifier
                         page.correct += 1
-                        checkbox_item.set(True)
                 else:
                         page.score = 0
                         page.correct = 0
-                        checkbox_item.set(False)
-                if self.users[self.current_user.get()].question == end_number - 1:
-                        self.check_score()
-                        self.show_answers()
+                if all(i.get() == "Answered" for i in self.checkbox_questions.values()):
+                        self.confirm_button.config(state=tk.NORMAL)
+                        self.done_label.config(text="The quiz can be ended.")
+                else:
+                        self.confirm_button.config(state=tk.DISABLED)
+                        self.done_label.config(text="Please answer all questions to end the quiz.")
 
         def check_score(self):
                 current_score = 0
@@ -541,7 +557,7 @@ class QuestionPage(tk.Frame):
                 question.grid(row=1, column=0, columnspan=4)
 
                 if number == end_number - 1:
-                        next_page = EndPage
+                        next_page = "QuestionPage" + str(number)
                 else:
                         next_page = "QuestionPage" + str(number+1)
 
@@ -589,7 +605,7 @@ class EndPage(tk.Frame):
                 grade.grid(row=3, column=1, columnspan=2)
                 show_answers_button = ttk.Button(self, text="Show Answers", command=lambda: self.show_questions(controller))
                 show_answers_button.grid(row=4, column=1, columnspan=2)
-                new_quiz_button = ttk.Button(self, text="Save user and start again?", command=lambda: controller.new_user(tk.messagebox.askyesno("Confirmation", message="Start a new quiz?")))
+                new_quiz_button = ttk.Button(self, text="Start Again?", command=lambda: controller.new_user(tk.messagebox.askyesno("Confirmation", message="Start a new quiz?")))
                 new_quiz_button.grid(row=5, column=1)
                 quit_button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno("Confirmation", message="Quit?")))
                 quit_button.grid(row=5, column=2)
