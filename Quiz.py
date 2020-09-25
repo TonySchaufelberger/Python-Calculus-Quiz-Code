@@ -214,7 +214,7 @@ class RootFrame(tk.Tk):
                                 with open("user_data.json", "w") as json_file_write:
                                         new_dictionary = {i:dictionary[i] for i in dictionary if i!=user}
                                         json_file_write.seek(0)
-                                        new_data = {'users': new_dictionary}
+                                        new_data = {'users': new_dictionary}name_validation
                                         if reset_all:
                                                 new_data = {'users': {}}
                                         json.dump(new_data, json_file_write, indent=4)
@@ -277,7 +277,7 @@ class RootFrame(tk.Tk):
         def generate_quiz(self, *question_lists):
                 """This method is the same as the for loop in the __init__, except it passes each question as its own instance
                 It takes from a question_list generated from the types of question chosen by the user"""
-                self.checkbox_frame = tk.Frame(self, bg='blue')
+                self.checkbox_frame = tk.Frame(self, bg=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
                 self.checkbox_frame.pack(expand=True, side="left", fill='both')
                 self.checkbox_questions = {}
                 
@@ -350,6 +350,7 @@ class RootFrame(tk.Tk):
                         question_i += 1
 
         def start_quiz(self):
+                # Starts the quiz. Opens an error if nothing is selected.
                 section_list = self.check_section()
                 if section_list == []:
                         tk.messagebox.showwarning("Warning", message="Please select a question type.")
@@ -358,12 +359,13 @@ class RootFrame(tk.Tk):
                         self.show_frame("QuestionPage0")
 
         def end_quiz(self):
+                # Ends the quiz. Checks the score, checks the answers, goes to the last page.
                 self.check_score()
                 self.show_answers()
                 self.show_frame(EndPage)
 
         def check_answer(self, answer, correct_answer, score_modifier, page, end_number, checkbox_item):
-                """Checks if the answer selected by a button is correct"""
+                # Checks if the answer selected by a button is correct or answered. If answered, it changes the corresponding label.
                 self.users[self.current_user.get()].question = page.number
                 page.chosen_answer = answer
                 checkbox_item.set("Skipped")
@@ -383,6 +385,7 @@ class RootFrame(tk.Tk):
                         self.done_label.config(text="Please answer all questions to end the quiz.")
 
         def check_score(self):
+                # Checks the total current score and applies it to the current user, and gives them a grade.
                 current_score = 0
                 number_correct = 0
                 for i in self.frames:
@@ -407,6 +410,7 @@ class RootFrame(tk.Tk):
                 self.save_user()
 
         def check_section(self):
+                # Checks which sections is applied.
                 sections = []
                 complex_numbers, differentiation, integration = None, None, None
                 if self.complex_test.get() == True:
@@ -422,6 +426,7 @@ class RootFrame(tk.Tk):
                 return sections
 
         def show_answers(self):
+                # Checks which information for which question is to be shown.
                 i = len(self.frames) - 4
                 chosen_questions = []
                 while i > -1:
@@ -434,6 +439,7 @@ class RootFrame(tk.Tk):
                 return chosen_questions
 
         def restart(self, value):
+                # Restarts the quiz to the selection page.
                 if value:
                         self.score.set(0)
                         i = len(self.frames) - 4
@@ -445,6 +451,7 @@ class RootFrame(tk.Tk):
                         return True
 
         def save_user(self):
+                # Saves the current user.
                 if self.current_user.get() != "" and self.user_saved == False:
                         self.users[self.current_user.get()].user_write()
                         #self.load_user_set(self.current_user.get())
@@ -452,6 +459,7 @@ class RootFrame(tk.Tk):
             
 
         def new_user(self, value):
+                # Makes a new user.
                 if self.restart(value):
                         self.save_user()
                         self.user_saved = False
@@ -459,6 +467,7 @@ class RootFrame(tk.Tk):
                         self.show_frame(StartingPage)
         
         def quit(self, value):
+                # Destroys everything.
                 if value:
                         self.destroy()
 
