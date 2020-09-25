@@ -214,7 +214,7 @@ class RootFrame(tk.Tk):
                                 with open("user_data.json", "w") as json_file_write:
                                         new_dictionary = {i:dictionary[i] for i in dictionary if i!=user}
                                         json_file_write.seek(0)
-                                        new_data = {'users': new_dictionary}name_validation
+                                        new_data = {'users': new_dictionary}
                                         if reset_all:
                                                 new_data = {'users': {}}
                                         json.dump(new_data, json_file_write, indent=4)
