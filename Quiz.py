@@ -16,7 +16,6 @@ def loadfont(fontpath, private=True, enumerable=False):
     `enumerable`  if True, this font will appear when enumerating fonts
 
     See https://msdn.microsoft.com/en-us/library/dd183327(VS.85).aspx
-
     '''
     if isinstance(fontpath, bytes):
         pathbuf = create_string_buffer(fontpath)
@@ -37,8 +36,8 @@ loadfont("Roboto-Regular.ttf")
 LARGE_FONT = ("Roboto", 12)
 REGULAR_FONT = ("Montserrat Regular", 10)
 SMALL_FONT = ("Montserrat Regular", 8)
-LIGHT_THEME = {"COLOR_PRIMARY": "#fafafa", "color_font": "#000000"}
-DARK_THEME = {"COLOR_PRIMARY": "#121212", "color_font": "#6695ed"}
+LIGHT_THEME = {"color_primary": "#fafafa", "color_font": "#000000"}
+DARK_THEME = {"color_primary": "#121212", "color_font": "#6695ed"}
 CORRECT_COLOUR = "#91f78f"
 INCORRECT_COLOUR = "#f77c7c"
 THEMING = (LIGHT_THEME, DARK_THEME)
@@ -47,22 +46,25 @@ SPECIAL_CHARACTERS = ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+"
                       "/", "?", ";", "[", "]", "{", "}", "|", "\\", "'", '"', ",", "."]
 
 def combine_funcs(*funcs):
-        """A function designed to return multiple functions for the tkinter button commands"""
+        # A function designed to return multiple functions for the tkinter button commands
         def combined_func(*args, **kwargs):
                 for f in funcs:
                         f(*args, **kwargs)
         return combined_func
 
 def row_column_configure(parent, rows, columns):
+        # Automatically configs row and column weight
         for i in range(rows):
                 parent.rowconfigure(i, weight=1)
         for j in range(columns):
                 parent.columnconfigure(j, weight=1)
 
 def open_help():
+        # Opens browser page
         webbrowser.open("https://github.com/TonySchaufelberger/Python-Calculus-Quiz-Code", new=2)
 
 def help_callback(event):
+        # Callback so keybind functions work
         open_help()
 
 def check_name_entry(text):
@@ -94,7 +96,7 @@ class UserData():
                         i = 2
                         original_name = self.name
                         while original_name in dic["users"]:
-                                # Makes it so that repeated names are valid
+                                # Makes it so that repeated names are valid (renames like user(number))
                                 original_name = self.name
                                 original_name = "{}({})".format(self.name, i)
                                 i += 1
@@ -105,9 +107,11 @@ class UserData():
                         json.dump(dic, json_file, indent=4)
 
 class RootFrame(tk.Tk):
-        """The frame that stores all important information, and is parent to all other frames
-        The show_frame method raises the selected frame to the top
-        The generate_quiz method generates a series of frames each containing a unique question, based on the types of questions selected"""
+        """
+            The frame that stores all important information, and is parent to all other frames
+            The show_frame method raises the selected frame to the top
+            The generate_quiz method generates a series of frames each containing a unique question, based on the types of questions selected
+        """
 
         def __init__(self, *args, **kwargs):
                 tk.Tk.__init__(self, *args, **kwargs)
@@ -127,7 +131,8 @@ class RootFrame(tk.Tk):
                 self.load_user = tk.Menu(filemenu, tearoff=0)
                 filemenu.add_cascade(label="Load User", menu=self.load_user, font=SMALL_FONT, state=tk.DISABLED)
                 #self.load_user_set()
-                                
+
+                # Adding each menu window
                 menubar.add_cascade(label="File", menu=filemenu, font=SMALL_FONT)
                 optionmenu = tk.Menu(menubar, tearoff=0)
                 thememenu = tk.Menu(filemenu, tearoff=0)
@@ -142,6 +147,7 @@ class RootFrame(tk.Tk):
                 self.config(menu=menubar)
 
                 self.style = ttk.Style()
+                # Theme number is for switching between light and dark theme
                 self.theme_number = tk.IntVar(self, 0)
                 
                 # I've converted container to self.container so I can access it in a different method
@@ -167,16 +173,19 @@ class RootFrame(tk.Tk):
                 self.show_frame(StartingPage)
 
         def initialize_frames(self):
+                # Adds each frame as a part of the GUI, so that the same instance can be accessed later
                 for f in (StartingPage, SelectionPage, EndPage):
                         frame = f(self.container, self)
                         self.frames[f] = frame
                         frame.grid(row=0, column=0, sticky="nsew")
 
         def show_frame(self, cont):
+                # Raises the selected page to the top
                 frame = self.frames[cont]
                 frame.tkraise()
 
         def set_theme(self, theme_chosen_number):
+                # Swap theme numbers from light to dark and vice versa. Resets the quiz.
                 if tk.messagebox.askyesno("Warning", message="Warning: this will restart the quiz and remove all progress. Proceed?"):
                         self.theme_number.set(theme_chosen_number)
                         self.initialize_frames()
@@ -195,12 +204,13 @@ class RootFrame(tk.Tk):
                                         self.load_user.add_command(label=user)"""
 
         def configure_theme(self):
-                self.style.configure('TButton', font=SMALL_FONT, background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
-                self.style.configure('TLabel', foreground=THEMING[self.theme_number.get()]["color_font"], background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
-                self.style.configure('TMenubutton', font=SMALL_FONT, foreground=THEMING[self.theme_number.get()]["color_font"], background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
-                self.style.configure('TCheckbutton', font=SMALL_FONT, foreground=THEMING[self.theme_number.get()]["color_font"], background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
-                self.style.configure('TRadiobutton', font=SMALL_FONT, foreground=THEMING[self.theme_number.get()]["color_font"], background=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
-                self.container.config(bg=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
+                # Resets everything based on the theme number
+                self.style.configure('TButton', font=SMALL_FONT, background=THEMING[self.theme_number.get()]["color_primary"])
+                self.style.configure('TLabel', foreground=THEMING[self.theme_number.get()]["color_font"], background=THEMING[self.theme_number.get()]["color_primary"])
+                self.style.configure('TMenubutton', font=SMALL_FONT, foreground=THEMING[self.theme_number.get()]["color_font"], background=THEMING[self.theme_number.get()]["color_primary"])
+                self.style.configure('TCheckbutton', font=SMALL_FONT, foreground=THEMING[self.theme_number.get()]["color_font"], background=THEMING[self.theme_number.get()]["color_primary"])
+                self.style.configure('TRadiobutton', font=SMALL_FONT, foreground=THEMING[self.theme_number.get()]["color_font"], background=THEMING[self.theme_number.get()]["color_primary"])
+                self.container.config(bg=THEMING[self.theme_number.get()]["color_primary"])
 
         def score_popup(self):
                 popup_box = tk.Tk()
@@ -222,7 +232,7 @@ class RootFrame(tk.Tk):
                                 popup_box.destroy()
                                 self.score_popup()
 
-                i = 1
+                rows = 1
                 name_title = ttk.Label(popup_box, text="Name", font=LARGE_FONT)
                 score_title = ttk.Label(popup_box, text="Score", font=LARGE_FONT)
                 correct_title = ttk.Label(popup_box, text="Number Correct", font=LARGE_FONT)
@@ -236,6 +246,7 @@ class RootFrame(tk.Tk):
                 year_title.grid(row=0, column=4)
                 sections_title.grid(row=0, column=5)
                 with open("user_data.json", "r+") as json_file:
+                        # Loads json file, puts it to a list so python can read it
                         data = json.load(json_file)
                         users = {k : v for k, v in sorted(data['users'].items())}
                         reset_button = ttk.Button(popup_box, text="Reset All", command=lambda: remove_user(users, "", json_file, tk.messagebox.askyesno("Confirmation", message="Reset all Users?"), True))
@@ -254,42 +265,37 @@ class RootFrame(tk.Tk):
                                 user_year.set(users[user]['year'])
                                 user_sections = tk.StringVar(popup_box)
                                 user_sections.set(users[user]['sections'])
-                                delete_user = ttk.Button(popup_box, text="Remove Score", command=lambda user=user: remove_user(users, user, json_file, tk.messagebox.askyesno("Confirmation", message="Remove User?")))
-                                name_label = ttk.Label(popup_box, text=user_name.get(), font=REGULAR_FONT)
-                                name_label.grid(row=i, column=0)
-                                score_label = ttk.Label(popup_box, text=user_score.get(), font=REGULAR_FONT)
-                                score_label.grid(row=i, column=1)
-                                score_label = ttk.Label(popup_box, text=user_correct.get(), font=REGULAR_FONT)
-                                score_label.grid(row=i, column=2)
-                                grade_label = ttk.Label(popup_box, text=user_grade.get(), font=REGULAR_FONT)
-                                grade_label.grid(row=i, column=3)
-                                year_label = ttk.Label(popup_box, text=user_year.get(), font=REGULAR_FONT)
-                                year_label.grid(row=i, column=4)
-                                sections_label = ttk.Label(popup_box, text=user_sections.get(), font=REGULAR_FONT)
-                                sections_label.grid(row=i, column=5)
-                                delete_user.grid(row=i, column=6)
-                                i += 1
-                row_column_configure(popup_box, i, 6)
-                popup_box.geometry("800x"+str(50*i))
+                                ttk.Label(popup_box, text=user_name.get(), font=REGULAR_FONT).grid(row=rows, column=0)
+                                ttk.Label(popup_box, text=user_score.get(), font=REGULAR_FONT).grid(row=rows, column=1)
+                                ttk.Label(popup_box, text=user_correct.get(), font=REGULAR_FONT).grid(row=rows, column=2)
+                                ttk.Label(popup_box, text=user_grade.get(), font=REGULAR_FONT).grid(row=rows, column=3)
+                                ttk.Label(popup_box, text=user_year.get(), font=REGULAR_FONT).grid(row=rows, column=4)
+                                ttk.Label(popup_box, text=user_sections.get(), font=REGULAR_FONT).grid(row=rows, column=5)
+                                ttk.Button(popup_box, text="Remove Score", command=lambda user=user: remove_user(users, user, json_file, tk.messagebox.askyesno("Confirmation", message="Remove User?"))).grid(row=rows, column=6)
+                                rows += 1
+                row_column_configure(popup_box, rows, 6)
+                popup_box.geometry("800x"+str(50*rows))
                 popup_box.resizable(False, False)
                 popup_box.mainloop()
 
         def generate_quiz(self, *question_lists):
-                """This method is the same as the for loop in the __init__, except it passes each question as its own instance
-                It takes from a question_list generated from the types of question chosen by the user"""
-                self.checkbox_frame = tk.Frame(self, bg=THEMING[self.theme_number.get()]["COLOR_PRIMARY"])
+                """
+                    This method is the same as the for loop in the __init__, except it passes each question as its own instance
+                    It takes from a question_list generated from the types of question chosen by the user
+                """
+                self.checkbox_frame = tk.Frame(self, bg=THEMING[self.theme_number.get()]["color_primary"])
                 self.checkbox_frame.pack(expand=True, side="left", fill='both')
                 self.checkbox_questions = {}
                 
                 length, section_length = len(question_lists[0])*10, 10
                 for question in range(length):
-                        # Initialize checkboxes
+                        # Initialize check labels for checking if a user finished a question or not
                         self.checkbox_questions[str(question+1)] = tk.StringVar(self, "Not Completed")
                         question_label = ttk.Button(self.checkbox_frame, text="Question " + str(question+1), command=lambda question=question: self.show_frame("QuestionPage"+str(question)))
                         question_label.grid(row=question, column=0)
-                        
                         check_label = ttk.Label(self.checkbox_frame, textvariable=self.checkbox_questions[str(question+1)])
                         check_label.grid(row=question, column=1)
+                        
                 self.done_label = ttk.Label(self.checkbox_frame, text="Please answer all questions to end the quiz.")
                 self.done_label.grid(row=length+2, column=0, columnspan=2)
                 self.confirm_button = ttk.Button(self.checkbox_frame, text="Confirm", command=lambda: self.end_quiz(), state=tk.DISABLED)
@@ -297,23 +303,23 @@ class RootFrame(tk.Tk):
                 difficulty, difficulty_before = "easy", ""
                 new_list = [{"easy": [], "medium": [], "hard": []}, {"easy": [], "medium": [], "hard": []}, {"easy": [], "medium": [], "hard": []}]
                 modifier = 1
-                # The question_i variable is reset when there is a change in difficulty
-                question_i = 0
+                # The change_in_difficulty variable is reset when there is a change in difficulty
+                change_in_difficulty = 0
                 for question in range(length):
                         difficulty_before = difficulty
-                        """The 'i' variable is used to determine which question list the question is taken from.
-                        When sections are off, it's random. When they are on, it is in order."""
+                        # The 'i' variable is used to determine which question list the question is taken from.
+                        # When sections are off, it's random. When they are on, it is in order.
                         if self.section_check.get() == False:
                                 modifier = math.floor(question / 10)
                                 i = modifier
-                                # The i_2 here selects the corresponding question type with the new list
-                                i_2 = i
+                                # The type_iterator here selects the corresponding question type with the new list
+                                type_iterator = i
                                 # The difficulty lengths are the same across 10 questions
                                 easy_length, medium_length = 3, 7
                         else:
                                 i = random.randint(0,len(question_lists[0])-1)
                                 # Because the question types are random, it only uses it within the same dictionary in the list
-                                i_2 = 0
+                                type_iterator = 0
                                 # Difficulty lengths adjust depending on the quiz length
                                 easy_length, medium_length = (length / 3), (3 * length / 4)
                                 section_length = 0
@@ -328,26 +334,26 @@ class RootFrame(tk.Tk):
                                 difficulty = "hard"
                                 score_modifier = 3
 
-                        # If there is a change in difficulty, reset question_i so that the question can properly index it
+                        # If there is a change in difficulty, reset change_in_difficulty so that the question can properly index it
                         if difficulty_before != difficulty:
-                                question_i = 0
+                                change_in_difficulty = 0
 
                         random.shuffle(question_lists[0][i][difficulty])
                         # Checks to see if there is a duplicate, duplicate = shuffle again
-                        while question_lists[0][i][difficulty][0] in new_list[i_2][difficulty]:
+                        while question_lists[0][i][difficulty][0] in new_list[type_iterator][difficulty]:
                                 random.shuffle(question_lists[0][i][difficulty])
                         
-                        new_list[i_2][difficulty] += [question_lists[0][i][difficulty][0]]
+                        new_list[type_iterator][difficulty] += [question_lists[0][i][difficulty][0]]
                         
                         if self.section_check.get() == False:
-                                # When there are no sections, disable question_i functionality
-                                question_i = len(new_list[i_2][difficulty]) - 1
+                                # When there are no sections, disable change_in_difficulty functionality
+                                change_in_difficulty = len(new_list[type_iterator][difficulty]) - 1
 
-                        frame = QuestionPage(self.container, self, question, question_i, score_modifier, length, new_list[i_2][difficulty], self.checkbox_questions[str(question+1)])
+                        frame = QuestionPage(self.container, self, question, change_in_difficulty, score_modifier, length, new_list[type_iterator][difficulty], self.checkbox_questions[str(question+1)])
                         self.frames["QuestionPage" + str(question)] = frame
                         frame.grid(row=0, column=0, sticky="nsew")
 
-                        question_i += 1
+                        change_in_difficulty += 1
 
         def start_quiz(self):
                 # Starts the quiz. Opens an error if nothing is selected.
@@ -431,15 +437,15 @@ class RootFrame(tk.Tk):
                 chosen_questions = []
                 while i > -1:
                         question_page = self.frames["QuestionPage" + str(i)]
-                        question = question_page.question_list[question_page.question_i]['question']
-                        correct_answer = question_page.question_list[question_page.question_i]["answers"][question_page.question_list[question_page.question_i]["correct_answer"]]
-                        chosen_answer = question_page.question_list[question_page.question_i]["answers"][question_page.chosen_answer]
+                        question = question_page.question_list[question_page.change_in_difficulty]['question']
+                        correct_answer = question_page.question_list[question_page.change_in_difficulty]["answers"][question_page.question_list[question_page.change_in_difficulty]["correct_answer"]]
+                        chosen_answer = question_page.question_list[question_page.change_in_difficulty]["answers"][question_page.chosen_answer]
                         chosen_questions.append([question,correct_answer,chosen_answer])
                         i = i - 1
                 return chosen_questions
 
         def restart(self, value):
-                # Restarts the quiz to the selection page.
+                # Restarts the quiz to the selection page without changing current user.
                 if value:
                         self.score.set(0)
                         i = len(self.frames) - 4
@@ -447,6 +453,7 @@ class RootFrame(tk.Tk):
                                 j = "QuestionPage" + str(i)
                                 del self.frames[j]
                                 i = i - 1
+                        self.checkbox_frame.pack_forget()
                         self.show_frame(SelectionPage)
                         return True
 
@@ -467,17 +474,17 @@ class RootFrame(tk.Tk):
                         self.show_frame(StartingPage)
         
         def quit(self, value):
-                # Destroys everything.
+                # Destroys everything and doesn;t save current progress.
                 if value:
                         self.destroy()
 
 class StartingPage(tk.Frame):
-        """This page contains a next button to the selection page"""
+        #This page contains a next button to the selection page, and a name and year entry
         def __init__(self, parent, controller):
                 tk.Frame.__init__(self, parent)
-                self.config(bg=THEMING[controller.theme_number.get()]["COLOR_PRIMARY"])
+                self.config(bg=THEMING[controller.theme_number.get()]["color_primary"])
                 row_column_configure(self, 3, 5)
-                top_frame = tk.Frame(self, bg=THEMING[controller.theme_number.get()]["COLOR_PRIMARY"])
+                top_frame = tk.Frame(self, bg=THEMING[controller.theme_number.get()]["color_primary"])
                 row_column_configure(top_frame, 1, 1)
                 top_frame.pack(fill="both", expand=True, padx=5, pady=10)
                 label = ttk.Label(top_frame, text="Welcome to NCEA Level 3 Calculus External Revision Quiz.", font=LARGE_FONT)
@@ -498,6 +505,7 @@ class StartingPage(tk.Frame):
                 name_entry.grid(row=1, column=1)
 
                 def save_name(saved_name):
+                        # Saves a name to the controller
                         if saved_name.get() == "":
                                 tk.messagebox.showwarning("Warning", message="Please give a name.")
                         else:
@@ -513,15 +521,18 @@ class StartingPage(tk.Frame):
                 button.grid(row=2, column=0)
 
 class SelectionPage(tk.Frame):
-        """This page contains check buttons to toggle which type of question will be asked in the quiz
-        It toggles if the question_list will include complex, differentiation and/or integration, and whether it's separated by section"""
+        """
+            This page contains check buttons to toggle which type of question will be asked in the quiz
+            It toggles if the question_list will include complex, differentiation and/or integration, and whether it's separated by section
+        """
         def __init__(self, parent, controller):
                 tk.Frame.__init__(self, parent)
-                self.config(bg=THEMING[controller.theme_number.get()]["COLOR_PRIMARY"])
+                self.config(bg=THEMING[controller.theme_number.get()]["color_primary"])
                 row_column_configure(self, 8, 4)
                 label = ttk.Label(self, text="Select which sections you want to test", font=LARGE_FONT)
                 label.grid(row=0, column=1, columnspan=2, sticky="nsew")
 
+                # Check areas
                 complex_check = ttk.Checkbutton(self, text="Test Complex Numbers?", variable=controller.complex_test)
                 differentiation_check = ttk.Checkbutton(self, text="Test Differentiation?", variable=controller.differentiation_test)
                 integration_check = ttk.Checkbutton(self, text="Test Integration?", variable=controller.integration_test)
@@ -537,32 +548,35 @@ class SelectionPage(tk.Frame):
                 button.grid(row=7, column=1, columnspan=2, sticky="ew")
 
 class QuestionPage(tk.Frame):
-        """This is the general frame for questions, which will change depending on the number and type of question asked
-        There will always be multiple instances of this object
-        For each instance of a QuestionPage, the number increments by one, which takes the next question in the question_list
-        This question_list is generated based on the checkboxes the user checked before"""
-        def __init__(self, parent, controller, number, question_i, score_modifier, end_number, question_list, checkbox_item):
+        """
+            This is the general frame for questions, which will change depending on the number and type of question asked
+            There will always be multiple instances of this object
+            For each instance of a QuestionPage, the number increments by one, which takes the next question in the question_list
+            This question_list is generated based on the checkboxes the user checked before
+        """
+        def __init__(self, parent, controller, number, change_in_difficulty, score_modifier, end_number, question_list, checkbox_item):
                 tk.Frame.__init__(self, parent)
-                self.config(bg=THEMING[controller.theme_number.get()]["COLOR_PRIMARY"])
+                self.config(bg=THEMING[controller.theme_number.get()]["color_primary"])
                 self.number = number
                 self.question_list = question_list
-                self.question_i = question_i
+                self.change_in_difficulty = change_in_difficulty
                 row_column_configure(self, 6, 4)
                 text = "Question " + str(number+1) + "/" + str(end_number)
                 label = ttk.Label(self, text=text, font=LARGE_FONT)
                 label.grid(row=0, column=0, columnspan=4)
-                type_label = ttk.Label(self, text=self.question_list[question_i]["type"], font=REGULAR_FONT)
+                type_label = ttk.Label(self, text=self.question_list[change_in_difficulty]["type"], font=REGULAR_FONT)
                 type_label.grid(row=0, rowspan=2, column=0)
                 user_label = ttk.Label(self, text="User: " + controller.current_user.get(), font=REGULAR_FONT)
                 user_label.grid(row=0, rowspan=2, column=3)
 
+                # Score-related attributes
                 self.score = 0
                 self.correct = 0
                 self.chosen_answer = ""
 
-                """Essentially, each question is index 0 of the shuffled list. At the end, this index is deleted, so that old index 1 becomes index 0.
-                This way, no question is repeated."""
-                question = ttk.Label(self, text=self.question_list[question_i]['question'], font=REGULAR_FONT)
+                # Essentially, each question is index 0 of the shuffled list. At the end, this index is deleted, so that old index 1 becomes index 0.
+                # This way, no question is repeated.
+                question = ttk.Label(self, text=self.question_list[change_in_difficulty]['question'], font=REGULAR_FONT)
                 question.grid(row=1, column=0, columnspan=4)
 
                 if number == end_number - 1:
@@ -570,13 +584,13 @@ class QuestionPage(tk.Frame):
                 else:
                         next_page = "QuestionPage" + str(number+1)
 
-                """The for loop here generates buttons of each answer. Each button has the command to check if it was right, and then move to the next frame.
-                I've put this into a for loop to make it easier to program"""
+                #The for loop here generates buttons of each answer. Each button has the command to check if it was right, and then move to the next frame.
+                # I've put this into a for loop to make it easier to program
                 answer = {}
                 i, j = 0.6, 0
-                answers_frame = tk.Frame(self, background=THEMING[controller.theme_number.get()]["COLOR_PRIMARY"])
+                answers_frame = tk.Frame(self, background=THEMING[controller.theme_number.get()]["color_primary"])
                 for letter in ['a','b','c','d']:
-                        answer[letter] = ttk.Button(answers_frame, text=self.question_list[question_i]['answers'][letter], command=lambda letter=letter, correct_letter=self.question_list[question_i]["correct_answer"], next_page=next_page: combine_funcs(controller.check_answer(letter, correct_letter, score_modifier, self, end_number, checkbox_item), controller.show_frame(next_page)))
+                        answer[letter] = ttk.Button(answers_frame, text=self.question_list[change_in_difficulty]['answers'][letter], command=lambda letter=letter, correct_letter=self.question_list[change_in_difficulty]["correct_answer"], next_page=next_page: combine_funcs(controller.check_answer(letter, correct_letter, score_modifier, self, end_number, checkbox_item), controller.show_frame(next_page)))
                         answer[letter].grid(row=round(i), column=[1,2,1,2][j], pady=2, padx=2)
                         i += 0.5
                         j += 1
@@ -592,10 +606,10 @@ class QuestionPage(tk.Frame):
                 quit_button.grid(row=5, column=3, sticky="w")
 
 class EndPage(tk.Frame):
-        """"""
+        # Page where the score is shown and the user can check answers
         def __init__(self, parent, controller):
                 tk.Frame.__init__(self, parent)
-                self.config(bg=THEMING[controller.theme_number.get()]["COLOR_PRIMARY"])
+                self.config(bg=THEMING[controller.theme_number.get()]["color_primary"])
                 row_column_configure(self, 5, 5)
 
                 user_title = ttk.Label(self, text="User: ", font=LARGE_FONT)
@@ -620,6 +634,7 @@ class EndPage(tk.Frame):
                 quit_button.grid(row=5, column=2)
 
         def show_questions(self, cont):
+                # Opens a listbox popup where the user can check their answers
                 answers_box = tk.Tk()
                 tk.Tk.wm_title(answers_box, "Answers")
                 scrollbar = tk.Scrollbar(answers_box)
@@ -629,6 +644,7 @@ class EndPage(tk.Frame):
                 question_list = cont.show_answers()
                 j=0
                 for i in question_list:
+                        # If the user answered correct, turns green, if not, turns red
                         if i[1] == i[2]:
                                 answer_is = "CORRECT"
                                 colour = CORRECT_COLOUR
