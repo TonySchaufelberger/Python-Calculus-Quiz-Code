@@ -166,6 +166,7 @@ class RootFrame(tk.Tk):
                 self.users = {}
                 self.user_saved = False
                 self.current_user = tk.StringVar(self)
+                self.in_quiz = False
                 self.frames = {}
 
                 self.initialize_frames()
@@ -368,6 +369,7 @@ class RootFrame(tk.Tk):
                 # Ends the quiz. Checks the score, checks the answers, goes to the last page.
                 self.check_score()
                 self.show_answers()
+                self.in_quiz = False
                 self.show_frame(EndPage)
 
         def check_answer(self, answer, correct_answer, score_modifier, page, end_number, checkbox_item):
@@ -453,7 +455,8 @@ class RootFrame(tk.Tk):
                                 j = "QuestionPage" + str(i)
                                 del self.frames[j]
                                 i = i - 1
-                        self.checkbox_frame.pack_forget()
+                        if hasattr(self, 'checkbox_frame'):
+                                self.checkbox_frame.pack_forget()
                         self.show_frame(SelectionPage)
                         return True
 
@@ -471,6 +474,7 @@ class RootFrame(tk.Tk):
                         self.save_user()
                         self.user_saved = False
                         self.current_user.set("")
+                        self.in_quiz = False
                         self.show_frame(StartingPage)
         
         def quit(self, value):
@@ -490,19 +494,20 @@ class StartingPage(tk.Frame):
                 label = ttk.Label(top_frame, text="Welcome to NCEA Level 3 Calculus External Revision Quiz.", font=LARGE_FONT)
                 label.grid(row=0, column=0, columnspan=5)
 
-                bottom_frame = tk.Frame(self)
+                bottom_frame = tk.Frame(self, bg=THEMING[controller.theme_number.get()]["color_primary"])
                 bottom_frame.pack(fill="both", expand=True)
+                row_column_configure(bottom_frame, 2, 4)
                 name = tk.StringVar(controller)
                 year_list = (0, 13, 12, 11, 10, 9)
                 year_dropdown = ttk.OptionMenu(bottom_frame, controller.year, *year_list)
-                year_dropdown.grid(row=1, column=4)
+                year_dropdown.grid(row=0, column=4)
                 name_title = ttk.Label(bottom_frame, text="Name:", font=REGULAR_FONT)
-                name_title.grid(row=1, column=0)
+                name_title.grid(row=0, column=0)
                 year_title = ttk.Label(bottom_frame, text="Year:", font=REGULAR_FONT)
-                year_title.grid(row=1, column=3)
+                year_title.grid(row=0, column=3)
                 name_validation = self.register(check_name_entry)
                 name_entry = ttk.Entry(bottom_frame, validate="all", validatecommand=(name_validation, "%P"), background="grey", textvariable=name, font=REGULAR_FONT)
-                name_entry.grid(row=1, column=1)
+                name_entry.grid(row=0, column=1)
 
                 def save_name(saved_name):
                         # Saves a name to the controller
@@ -513,12 +518,13 @@ class StartingPage(tk.Frame):
                                 controller.users[saved_name.get()] = UserData(saved_name.get())
                                 controller.users[saved_name.get()].year = controller.year.get()
                                 saved_name.set("")
+                                controller.in_quiz = True
                                 controller.show_frame(SelectionPage)
 
                 next_button = ttk.Button(bottom_frame, text="Next", command=lambda: save_name(name))
-                next_button.grid(row=2, column=4)
+                next_button.grid(row=1, column=4)
                 button = ttk.Button(bottom_frame, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno("Confirmation", message="Quit?")))
-                button.grid(row=2, column=0)
+                button.grid(row=1, column=0)
 
 class SelectionPage(tk.Frame):
         """
