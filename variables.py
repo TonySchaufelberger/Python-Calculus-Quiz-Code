@@ -1,27 +1,27 @@
 differentiation_questions = {"easy": [
   {
-    "question": "easy1",
+    "question": "Differentiate y=(2x+5)^-0.5",
     "type": "Differentiation",
     "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
+      "a": '(2+5)^-0.5',
+      "b": '-(2x+5)^-1.5',
+      "c": '(2x+5)^-1.5',
+      "d": '-(2x+5)^0.5',
       "0": 'N/A'
     },
-    "correct_answer": 'd'
+    "correct_answer": 'b'
   },
   {
-    "question": "easy2",
+    "question": "Find the rate of change of the function f(t)=5ln(3t-1) when t=4",
     "type": "Differentiation",
     "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
+      "a": '5e^2',
+      "b": '19/11',
+      "c": '15/11',
+      "d": '-19/11',
       "0": 'N/A'
     },
-    "correct_answer": 'a'
+    "correct_answer": 'c'
   },
   {
     "question": "easy3",
@@ -97,40 +97,40 @@ differentiation_questions = {"easy": [
   }],
         "medium": [
   {
-    "question": "test",
+    "question": "For what value(s) of x is the function y=(x^3)(e^x) decreasing?",
     "type": "Differentiation",
     "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
+      "a": 'x<-3',
+      "b": 'x>-3',
+      "c": '0',
+      "d": 'x<-3',
+      "0": 'N/A'
+    },
+    "correct_answer": 'd'
+  },
+  {
+    "question": "If f(x)=3cos3x, and nf(x)+f''(x)=0, find the value of n.",
+    "type": "Differentiation",
+    "answers": {
+      "a": 'n=9',
+      "b": 'n=8',
+      "c": 'n=3',
+      "d": 'n=0',
       "0": 'N/A'
     },
     "correct_answer": 'a'
   },
   {
-    "question": "medium1",
+    "question": "Find the gradient of the curve y=ln|sin^2(x)| when x=π/6",
     "type": "Differentiation",
     "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
+      "a": '-2√(3)',
+      "b": '√(3)',
+      "c": '2√(3)',
+      "d": '3√(2)',
       "0": 'N/A'
     },
-    "correct_answer": 'a'
-  },
-  {
-    "question": "medium2",
-    "type": "Differentiation",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
+    "correct_answer": 'c'
   },
   {
     "question": "medium3",
@@ -179,31 +179,19 @@ differentiation_questions = {"easy": [
       "0": 'N/A'
     },
     "correct_answer": 'a'
-  },
-  {
-    "question": "medium7",
-    "type": "Differentiation",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
   }],
         "hard": [
   {
-    "question": "hard1",
+    "question": "The volume of a sphere is increasing.\nWhen the sphere's radius is 0.5m, the surface area increases at a rate of 0.4m^2/s.\nFind the rate of increase of the volume at this instant.",
     "type": "Differentiation",
     "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
+      "a": '0.048 m^3/s',
+      "b": '0.1 m^3/s',
+      "c": '0.5 m^3/s',
+      "d": '0.01 m^3/s',
       "0": 'N/A'
     },
-    "correct_answer": 'a'
+    "correct_answer": 'b'
   },
   {
     "question": "hard2",
@@ -427,18 +415,6 @@ integration_questions = {"easy": [
   },
   {
     "question": "medium6",
-    "type": "Integration",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
-  },
-  {
-    "question": "medium7",
     "type": "Integration",
     "answers": {
       "a": 'a',
@@ -685,18 +661,6 @@ complex_questions = {
   },
   {
     "question": "medium6",
-    "type": "Complex Numbers",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
-  },
-  {
-    "question": "medium7",
     "type": "Complex Numbers",
     "answers": {
       "a": 'a',
