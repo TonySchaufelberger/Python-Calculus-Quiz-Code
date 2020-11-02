@@ -36,7 +36,7 @@ loadfont("Roboto-Regular.ttf")
 LARGE_FONT = ("Roboto", 12)
 REGULAR_FONT = ("Montserrat Regular", 10)
 SMALL_FONT = ("Montserrat Regular", 8)
-LIGHT_THEME = {"color_primary": "#fafafa", "color_font": "#000000"}
+LIGHT_THEME = {"color_primary": "#ffffff", "color_font": "#000000"}
 DARK_THEME = {"color_primary": "#121212", "color_font": "#6695ed"}
 CORRECT_COLOUR = "#91f78f"
 INCORRECT_COLOUR = "#f77c7c"
@@ -136,8 +136,8 @@ class RootFrame(tk.Tk):
                 menubar.add_cascade(label="File", menu=filemenu, font=SMALL_FONT)
                 optionmenu = tk.Menu(menubar, tearoff=0)
                 thememenu = tk.Menu(filemenu, tearoff=0)
-                thememenu.add_command(label="Light Theme", command=lambda: self.set_theme(0))
-                thememenu.add_command(label="Dark Theme", command=lambda: self.set_theme(1))
+                thememenu.add_command(label="Light Theme", command=lambda: self.set_theme(0), state=tk.DISABLED)
+                thememenu.add_command(label="Dark Theme", command=lambda: self.set_theme(1), state=tk.DISABLED)
                 optionmenu.add_cascade(label="Themes", menu=thememenu, font=SMALL_FONT)
                 menubar.add_cascade(label="Options", menu=optionmenu, font=SMALL_FONT)
                 scoremenu = tk.Menu(menubar, tearoff=0)
@@ -284,23 +284,34 @@ class RootFrame(tk.Tk):
                     This method is the same as the for loop in the __init__, except it passes each question as its own instance
                     It takes from a question_list generated from the types of question chosen by the user
                 """
-                self.checkbox_frame = tk.Frame(self, bg=THEMING[self.theme_number.get()]["color_primary"])
-                self.checkbox_frame.pack(expand=True, side="left", fill='both')
+                self.checkbox_canvas = tk.Canvas(self)
+                checkbox_frame = tk.Frame(self.checkbox_canvas, bg=THEMING[self.theme_number.get()]["color_primary"])
+                checkbox_frame.pack(expand=True, side="left", fill='both')
                 self.checkbox_questions = {}
+                checkbox_scrollbar = ttk.Scrollbar(checkbox_frame, orient="vertical", command=self.checkbox_canvas.yview)
+                checkbox_frame.bind(
+                    "<Configure>",
+                    lambda e: self.checkbox_canvas.configure(scrollregion=self.checkbox_canvas.bbox("all"))
+                )
+                self.checkbox_canvas.create_window((0, 0), window=checkbox_frame, anchor="nw")
+                self.checkbox_canvas.configure(yscrollcommand=checkbox_scrollbar.set)
+                self.checkbox_canvas.pack(expand=True, side="left", fill='both')
                 
                 length, section_length = len(question_lists[0])*10, 10
                 for question in range(length):
                         # Initialize check labels for checking if a user finished a question or not
                         self.checkbox_questions[str(question+1)] = tk.StringVar(self, "Not Completed")
-                        question_label = ttk.Button(self.checkbox_frame, text="Question " + str(question+1), command=lambda question=question: self.show_frame("QuestionPage"+str(question)))
+                        question_label = ttk.Button(checkbox_frame, text="Question " + str(question+1), command=lambda question=question: self.show_frame("QuestionPage"+str(question)))
                         question_label.grid(row=question, column=0)
-                        check_label = ttk.Label(self.checkbox_frame, textvariable=self.checkbox_questions[str(question+1)])
+                        check_label = ttk.Label(checkbox_frame, textvariable=self.checkbox_questions[str(question+1)])
                         check_label.grid(row=question, column=1)
+                checkbox_scrollbar.grid(row=0, rowspan=length+2, column=2, sticky='ns')
                         
-                self.done_label = ttk.Label(self.checkbox_frame, text="Please answer all questions to end the quiz.")
-                self.done_label.grid(row=length+2, column=0, columnspan=2)
-                self.confirm_button = ttk.Button(self.checkbox_frame, text="Confirm", command=lambda: self.end_quiz(), state=tk.DISABLED)
-                self.confirm_button.grid(row=length+1, column=0, columnspan=2)
+                self.done_label = ttk.Label(checkbox_frame, text="Please answer all questions to end the quiz.")
+                self.done_label.grid(row=length+2, column=0, columnspan=3)
+                self.confirm_button = ttk.Button(checkbox_frame, text="Confirm", command=lambda: self.end_quiz(), state=tk.DISABLED)
+                self.confirm_button.grid(row=length+1, column=0, columnspan=3)
+                row_column_configure(checkbox_frame, length+2, 3)
                 difficulty, difficulty_before = "easy", ""
                 new_list = [{"easy": [], "medium": [], "hard": []}, {"easy": [], "medium": [], "hard": []}, {"easy": [], "medium": [], "hard": []}]
                 modifier = 1
@@ -414,7 +425,7 @@ class RootFrame(tk.Tk):
                 else:
                         self.grade.set("Excellence")
                 self.users[self.current_user.get()].grade = self.grade.get()
-                self.checkbox_frame.pack_forget()
+                self.checkbox_canvas.pack_forget()
                 self.save_user()
 
         def check_section(self):
@@ -455,8 +466,8 @@ class RootFrame(tk.Tk):
                                 j = "QuestionPage" + str(i)
                                 del self.frames[j]
                                 i = i - 1
-                        if hasattr(self, 'checkbox_frame'):
-                                self.checkbox_frame.pack_forget()
+                        if hasattr(self, 'checkbox_canvas'):
+                                self.checkbox_canvas.pack_forget()
                         self.show_frame(SelectionPage)
                         return True
 
