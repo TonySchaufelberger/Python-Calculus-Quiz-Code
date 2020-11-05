@@ -178,7 +178,7 @@ class RootFrame(tk.Tk):
                 for f in (StartingPage, SelectionPage, EndPage):
                         frame = f(self.container, self)
                         self.frames[f] = frame
-                        frame.grid(row=0, column=0, sticky="nsew")
+                        frame.pack(row=0, column=0, sticky="nsew")
 
         def show_frame(self, cont):
                 # Raises the selected page to the top
@@ -279,25 +279,16 @@ class RootFrame(tk.Tk):
                 popup_box.resizable(False, False)
                 popup_box.mainloop()
 
-        def generate_quiz(self, *question_lists):
-                """
-                    This method is the same as the for loop in the __init__, except it passes each question as its own instance
-                    It takes from a question_list generated from the types of question chosen by the user
-                """
-                self.checkbox_canvas = tk.Canvas(self)
+        def create_sidebox(self, length):
+                self.checkbox_canvas = tk.Canvas(self, borderwidth=0)
                 checkbox_frame = tk.Frame(self.checkbox_canvas, bg=THEMING[self.theme_number.get()]["color_primary"])
-                checkbox_frame.pack(expand=True, side="left", fill='both')
                 self.checkbox_questions = {}
-                checkbox_scrollbar = ttk.Scrollbar(checkbox_frame, orient="vertical", command=self.checkbox_canvas.yview)
                 checkbox_frame.bind(
                     "<Configure>",
                     lambda e: self.checkbox_canvas.configure(scrollregion=self.checkbox_canvas.bbox("all"))
                 )
-                self.checkbox_canvas.create_window((0, 0), window=checkbox_frame, anchor="nw")
+                checkbox_scrollbar = ttk.Scrollbar(self.checkbox_canvas, orient="vertical", command=self.checkbox_canvas.yview)
                 self.checkbox_canvas.configure(yscrollcommand=checkbox_scrollbar.set)
-                self.checkbox_canvas.pack(expand=True, side="left", fill='both')
-                
-                length, section_length = len(question_lists[0])*10, 10
                 for question in range(length):
                         # Initialize check labels for checking if a user finished a question or not
                         self.checkbox_questions[str(question+1)] = tk.StringVar(self, "Not Completed")
@@ -305,13 +296,22 @@ class RootFrame(tk.Tk):
                         question_label.grid(row=question, column=0)
                         check_label = ttk.Label(checkbox_frame, textvariable=self.checkbox_questions[str(question+1)])
                         check_label.grid(row=question, column=1)
-                checkbox_scrollbar.grid(row=0, rowspan=length+2, column=2, sticky='ns')
-                        
                 self.done_label = ttk.Label(checkbox_frame, text="Please answer all questions to end the quiz.")
-                self.done_label.grid(row=length+2, column=0, columnspan=3)
+                self.done_label.grid(row=length+2, column=0, columnspan=2)
                 self.confirm_button = ttk.Button(checkbox_frame, text="Confirm", command=lambda: self.end_quiz(), state=tk.DISABLED)
-                self.confirm_button.grid(row=length+1, column=0, columnspan=3)
-                row_column_configure(checkbox_frame, length+2, 3)
+                self.confirm_button.grid(row=length+1, column=0, columnspan=2)
+                row_column_configure(checkbox_frame, length+2, 2)
+                self.checkbox_canvas.create_window((0, 0), window=checkbox_frame, anchor="nw", width=250)
+                self.checkbox_canvas.grid()
+                checkbox_scrollbar.pack(side='right', fill='y')
+                
+        def generate_quiz(self, *question_lists):
+                """
+                    This method is the same as the for loop in the __init__, except it passes each question as its own instance
+                    It takes from a question_list generated from the types of question chosen by the user
+                """
+                length, section_length = len(question_lists[0])*10, 10
+                self.create_sidebox(length)
                 difficulty, difficulty_before = "easy", ""
                 new_list = [{"easy": [], "medium": [], "hard": []}, {"easy": [], "medium": [], "hard": []}, {"easy": [], "medium": [], "hard": []}]
                 modifier = 1
@@ -477,7 +477,6 @@ class RootFrame(tk.Tk):
                         self.users[self.current_user.get()].user_write()
                         #self.load_user_set(self.current_user.get())
                         self.user_saved = True
-            
 
         def new_user(self, value):
                 # Makes a new user.
