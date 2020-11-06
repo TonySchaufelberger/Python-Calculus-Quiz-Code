@@ -178,7 +178,7 @@ class RootFrame(tk.Tk):
                 for f in (StartingPage, SelectionPage, EndPage):
                         frame = f(self.container, self)
                         self.frames[f] = frame
-                        frame.pack(row=0, column=0, sticky="nsew")
+                        frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
         def show_frame(self, cont):
                 # Raises the selected page to the top
@@ -280,7 +280,8 @@ class RootFrame(tk.Tk):
                 popup_box.mainloop()
 
         def create_sidebox(self, length):
-                self.checkbox_canvas = tk.Canvas(self, borderwidth=0)
+                canvas_frame = tk.Frame(self.container)
+                self.checkbox_canvas = tk.Canvas(canvas_frame, borderwidth=0)
                 checkbox_frame = tk.Frame(self.checkbox_canvas, bg=THEMING[self.theme_number.get()]["color_primary"])
                 self.checkbox_questions = {}
                 checkbox_frame.bind(
@@ -301,9 +302,10 @@ class RootFrame(tk.Tk):
                 self.confirm_button = ttk.Button(checkbox_frame, text="Confirm", command=lambda: self.end_quiz(), state=tk.DISABLED)
                 self.confirm_button.grid(row=length+1, column=0, columnspan=2)
                 row_column_configure(checkbox_frame, length+2, 2)
-                self.checkbox_canvas.create_window((0, 0), window=checkbox_frame, anchor="nw", width=250)
-                self.checkbox_canvas.grid()
+                self.checkbox_canvas.create_window((0, 0), window=checkbox_frame, anchor="nw", width=self.winfo_width()/2)
+                self.checkbox_canvas.pack(side='left', fill='both', expand=True)
                 checkbox_scrollbar.pack(side='right', fill='y')
+                canvas_frame.grid(column=0, row=0, sticky='nsew')
                 
         def generate_quiz(self, *question_lists):
                 """
@@ -363,7 +365,7 @@ class RootFrame(tk.Tk):
 
                         frame = QuestionPage(self.container, self, question, change_in_difficulty, score_modifier, length, new_list[type_iterator][difficulty], self.checkbox_questions[str(question+1)])
                         self.frames["QuestionPage" + str(question)] = frame
-                        frame.grid(row=0, column=0, sticky="nsew")
+                        frame.grid(row=0, column=1, sticky="nsew")
 
                         change_in_difficulty += 1
 
