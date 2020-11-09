@@ -281,7 +281,8 @@ class RootFrame(tk.Tk):
 
         def create_sidebox(self, length):
                 canvas_frame = tk.Frame(self.container)
-                self.checkbox_canvas = tk.Canvas(canvas_frame, borderwidth=0)
+                self.checkbox_canvas = tk.Canvas(canvas_frame, borderwidth=0, bg=THEMING[self.theme_number.get()]["color_primary"])
+                self.checkbox_canvas.config(scrollregion=self.checkbox_canvas.bbox("all"))
                 checkbox_frame = tk.Frame(self.checkbox_canvas, bg=THEMING[self.theme_number.get()]["color_primary"])
                 self.checkbox_questions = {}
                 checkbox_frame.bind(
@@ -303,8 +304,8 @@ class RootFrame(tk.Tk):
                 self.confirm_button.grid(row=length+1, column=0, columnspan=2)
                 row_column_configure(checkbox_frame, length+2, 2)
                 self.checkbox_canvas.create_window((0, 0), window=checkbox_frame, anchor="nw", width=self.winfo_width()/2)
-                self.checkbox_canvas.pack(side='left', fill='both', expand=True)
                 checkbox_scrollbar.pack(side='right', fill='y')
+                self.checkbox_canvas.pack(side='left', fill='both', expand=True)
                 canvas_frame.grid(column=0, row=0, sticky='nsew')
                 
         def generate_quiz(self, *question_lists):
