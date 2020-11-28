@@ -24,76 +24,52 @@ differentiation_questions = {"easy": [
     "correct_answer": 'c'
   },
   {
-    "question": "easy3",
+    "question": "Differentiate sin(2x)+cos(3x)",
     "type": "Differentiation",
     "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
+      "a": '2cos(2x)+3sin(3x)',
+      "b": '-2cos(2x)+3sin(3x)',
+      "c": '2cos(2x)-3sin(3x)',
+      "d": '3cos(3x)-2sin(3x)',
+      "0": 'N/A'
+    },
+    "correct_answer": 'c'
+  },
+  {
+    "question": "Differentiate e^(x)ln(x)",
+    "type": "Differentiation",
+    "answers": {
+      "a": 'e^(x)ln(x)',
+      "b": 'e^(x)ln(x)+e^(x)/x',
+      "c": 'e^(x)/x',
+      "d": 'e^(x)ln(x)-e^(x)/x',
+      "0": 'N/A'
+    },
+    "correct_answer": 'b'
+  },
+  {
+    "question": "Differentiate sin(e^t)+cos(e^t)",
+    "type": "Differentiation",
+    "answers": {
+      "a": 'e^t*(cos(e^t)-sin(e^t))',
+      "b": 'cos(e^t)-sin(e^t)',
+      "c": 'e^-t*(cos(e^t)-sin(e^t))',
+      "d": 'e^t*(cos(e^t)+sin(e^t))',
       "0": 'N/A'
     },
     "correct_answer": 'a'
   },
   {
-    "question": "easy4",
+    "question": "Differentiate sec^3(x^4)",
     "type": "Differentiation",
     "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
+      "a": '-12x^(3)sec^3(x^4)tan(x^4)',
+      "b": '12x^(3)sec^3(x^4)',
+      "c": 'sec^3(x^4)tan(x^4)',
+      "d": '12x^(3)sec^3(x^4)tan(x^4)',
       "0": 'N/A'
     },
-    "correct_answer": 'a'
-  },
-  {
-    "question": "easy5",
-    "type": "Differentiation",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
-  },
-  {
-    "question": "easy6",
-    "type": "Differentiation",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
-  },
-  {
-    "question": "easy7",
-    "type": "Differentiation",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
-  },
-  {
-    "question": "easy8",
-    "type": "Differentiation",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
+    "correct_answer": 'd'
   }],
         "medium": [
   {
@@ -155,30 +131,6 @@ differentiation_questions = {"easy": [
       "0": 'N/A'
     },
     "correct_answer": 'a'
-  },
-  {
-    "question": "medium5",
-    "type": "Differentiation",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
-  },
-  {
-    "question": "medium6",
-    "type": "Differentiation",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
   }],
         "hard": [
   {
@@ -194,52 +146,28 @@ differentiation_questions = {"easy": [
     "correct_answer": 'b'
   },
   {
-    "question": "hard2",
+    "question": "Differentiate arcsin(3x-5)",
     "type": "Differentiation",
     "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
+      "a": '3/√(1-(3x-5)^2)',
+      "b": '(3x-5)/√(1-(3x-5)^2)',
+      "c": '3/√(1+(3x-5)^2)',
+      "d": '3/√(1-(3x-5))',
       "0": 'N/A'
     },
     "correct_answer": 'a'
   },
   {
-    "question": "hard3",
+    "question": "Differentiate 2^(x+cos(x))",
     "type": "Differentiation",
     "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
+      "a": '(1-sin(x))2^(x+cos(x))',
+      "b": '(ln2)(1-sin(x))',
+      "c": '2^(x+cos(x))(ln2)(x+cos(x))',
+      "d": '2^(x+cos(x))(ln2)(1-sin(x))',
       "0": 'N/A'
     },
-    "correct_answer": 'a'
-  },
-  {
-    "question": "hard4",
-    "type": "Differentiation",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
-  },
-  {
-    "question": "hard5",
-    "type": "Differentiation",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
+    "correct_answer": 'd'
   }]
 }
 
@@ -315,30 +243,6 @@ integration_questions = {"easy": [
       "0": 'N/A'
     },
     "correct_answer": 'a'
-  },
-  {
-    "question": "easy7",
-    "type": "Integration",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
-  },
-  {
-    "question": "easy8",
-    "type": "Integration",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
   }],
         "medium": [
   {
@@ -400,30 +304,6 @@ integration_questions = {"easy": [
       "0": 'N/A'
     },
     "correct_answer": 'a'
-  },
-  {
-    "question": "medium5",
-    "type": "Integration",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
-  },
-  {
-    "question": "medium6",
-    "type": "Integration",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
   }],
         "hard": [
   {
@@ -452,30 +332,6 @@ integration_questions = {"easy": [
   },
   {
     "question": "hard3",
-    "type": "Integration",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
-  },
-  {
-    "question": "hard4",
-    "type": "Integration",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
-  },
-  {
-    "question": "hard5",
     "type": "Integration",
     "answers": {
       "a": 'a',
@@ -561,30 +417,6 @@ complex_questions = {
       "0": 'N/A'
     },
     "correct_answer": 'a'
-  },
-  {
-    "question": "easy7",
-    "type": "Complex Numbers",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
-  },
-  {
-    "question": "easy8",
-    "type": "Complex Numbers",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
   }],
         "medium": [
   {
@@ -646,30 +478,6 @@ complex_questions = {
       "0": 'N/A'
     },
     "correct_answer": 'a'
-  },
-  {
-    "question": "medium5",
-    "type": "Complex Numbers",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
-  },
-  {
-    "question": "medium6",
-    "type": "Complex Numbers",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
   }],
         "hard": [
   {
@@ -698,30 +506,6 @@ complex_questions = {
   },
   {
     "question": "hard3",
-    "type": "Complex Numbers",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
-  },
-  {
-    "question": "hard4",
-    "type": "Complex Numbers",
-    "answers": {
-      "a": 'a',
-      "b": 'b',
-      "c": 'c',
-      "d": 'd',
-      "0": 'N/A'
-    },
-    "correct_answer": 'a'
-  },
-  {
-    "question": "hard5",
     "type": "Complex Numbers",
     "answers": {
       "a": 'a',
