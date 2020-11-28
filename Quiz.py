@@ -120,6 +120,7 @@ class RootFrame(tk.Tk):
                 self.minsize(500, 300)
                 self.maxsize(1000, 600)
                 self.bind('<F1>', help_callback)
+                self.iconbitmap("euler.ico")
 
                 topbar = tk.Frame(self)
                 topbar.pack(side="top", fill="both", expand=False)
@@ -216,6 +217,7 @@ class RootFrame(tk.Tk):
         def score_popup(self):
                 popup_box = tk.Tk()
                 tk.Tk.wm_title(popup_box, "Scoreboard")
+                popup_box.iconbitmap("euler.ico")
 
                 def remove_user(dictionary, user, json_file, value, reset_all=False):
                         # This function removes the selected user by remaking the entire list without the selected user
@@ -502,10 +504,14 @@ class StartingPage(tk.Frame):
                 self.config(bg=THEMING[controller.theme_number.get()]["color_primary"])
                 row_column_configure(self, 3, 5)
                 top_frame = tk.Frame(self, bg=THEMING[controller.theme_number.get()]["color_primary"])
-                row_column_configure(top_frame, 1, 1)
+                row_column_configure(top_frame, 2, 1)
                 top_frame.pack(fill="both", expand=True, padx=5, pady=10)
                 label = ttk.Label(top_frame, text="Welcome to NCEA Level 3 Calculus External Revision Quiz.", font=LARGE_FONT)
-                label.grid(row=0, column=0, columnspan=5)
+                label.grid(row=0, column=0)
+                img = tk.PhotoImage(file="math-logo.gif")
+                image_label = tk.Label(top_frame, bg=THEMING[controller.theme_number.get()]["color_primary"], image=img)
+                image_label.image = img
+                image_label.grid(row=1, column=0)
 
                 bottom_frame = tk.Frame(self, bg=THEMING[controller.theme_number.get()]["color_primary"])
                 bottom_frame.pack(fill="both", expand=True)
@@ -535,7 +541,7 @@ class StartingPage(tk.Frame):
                                 controller.show_frame(SelectionPage)
 
                 next_button = ttk.Button(bottom_frame, text="Next", command=lambda: save_name(name))
-                next_button.grid(row=1, column=4)
+                next_button.grid(row=1, column=3, columnspan=2)
                 button = ttk.Button(bottom_frame, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno("Confirmation", message="Quit?")))
                 button.grid(row=1, column=0)
 
@@ -579,10 +585,10 @@ class QuestionPage(tk.Frame):
                 self.number = number
                 self.question_list = question_list
                 self.change_in_difficulty = change_in_difficulty
-                row_column_configure(self, 6, 4)
+                row_column_configure(self, 9, 4)
                 text = "Question " + str(number+1) + "/" + str(end_number)
-                label = ttk.Label(self, text=text, font=LARGE_FONT)
-                label.grid(row=0, column=0, columnspan=4)
+                question_number = ttk.Label(self, text=text, font=LARGE_FONT)
+                question_number.grid(row=0, column=0, columnspan=4)
                 type_label = ttk.Label(self, text=self.question_list[change_in_difficulty]["type"], font=REGULAR_FONT)
                 type_label.grid(row=0, rowspan=2, column=0)
                 user_label = ttk.Label(self, text="User: " + controller.current_user.get(), font=REGULAR_FONT)
@@ -596,7 +602,7 @@ class QuestionPage(tk.Frame):
                 # Essentially, each question is index 0 of the shuffled list. At the end, this index is deleted, so that old index 1 becomes index 0.
                 # This way, no question is repeated.
                 question = ttk.Label(self, text=self.question_list[change_in_difficulty]['question'], font=REGULAR_FONT)
-                question.grid(row=1, column=0, columnspan=4)
+                question.grid(row=1, rowspan=3, column=0, columnspan=4)
 
                 if number == end_number - 1:
                         next_page = "QuestionPage" + str(number)
@@ -613,16 +619,16 @@ class QuestionPage(tk.Frame):
                         answer[letter].grid(row=round(i), column=[1,2,1,2][j], pady=2, padx=2)
                         i += 0.5
                         j += 1
-                answers_frame.grid(row=2, column=1, columnspan=2)
+                answers_frame.grid(row=5, column=1, columnspan=2)
 
                 back_button = ttk.Button(self, text="Back", command=lambda: controller.show_frame("QuestionPage" + str(number-1) if number != 0 else "QuestionPage" + str(number)))
-                back_button.grid(row=3, column=1)
+                back_button.grid(row=6, column=1)
                 skip_button = ttk.Button(self, text="Skip", command=lambda next_page=next_page: combine_funcs(controller.check_answer('0', 1, score_modifier, self, end_number, checkbox_item), controller.show_frame(next_page)))
-                skip_button.grid(row=3, column=2)
+                skip_button.grid(row=6, column=2)
                 popup_button = ttk.Button(self, text="Restart", command=lambda: controller.restart(tk.messagebox.askyesno("Confirmation", message="Restart?")))
-                popup_button.grid(row=5, column=0, sticky="e")
+                popup_button.grid(row=7, column=0, sticky="e")
                 quit_button = ttk.Button(self, text="Quit", command=lambda: controller.quit(tk.messagebox.askyesno("Confirmation", message="Quit?")))
-                quit_button.grid(row=5, column=3, sticky="w")
+                quit_button.grid(row=7, column=3, sticky="w")
 
 class EndPage(tk.Frame):
         # Page where the score is shown and the user can check answers
