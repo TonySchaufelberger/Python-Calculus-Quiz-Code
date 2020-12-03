@@ -33,6 +33,67 @@ def loadfont(fontpath, private=True, enumerable=False):
 loadfont("Montserrat-Regular.ttf")
 loadfont("Roboto-Regular.ttf")
 
+""" tk_ToolTip_class101.py
+gives a Tkinter widget a tooltip as the mouse is above the widget
+tested with Python27 and Python34  by  vegaseat  09sep2014
+www.daniweb.com/programming/software-development/code/484591/a-tooltip-class-for-tkinter
+
+Modified to include a delay time by Victor Zaccardo, 25mar16
+"""
+
+class CreateToolTip(object):
+    """
+    create a tooltip for a given widget
+    """
+    def __init__(self, widget, text='widget info'):
+        self.waittime = 500     #miliseconds
+        self.wraplength = 180   #pixels
+        self.widget = widget
+        self.text = text
+        self.widget.bind("<Enter>", self.enter)
+        self.widget.bind("<Leave>", self.leave)
+        self.widget.bind("<ButtonPress>", self.leave)
+        self.id = None
+        self.tw = None
+
+    def enter(self, event=None):
+        self.schedule()
+
+    def leave(self, event=None):
+        self.unschedule()
+        self.hidetip()
+
+    def schedule(self):
+        self.unschedule()
+        self.id = self.widget.after(self.waittime, self.showtip)
+
+    def unschedule(self):
+        id = self.id
+        self.id = None
+        if id:
+            self.widget.after_cancel(id)
+
+    def showtip(self, event=None):
+        x = y = 0
+        x, y, cx, cy = self.widget.bbox("insert")
+        x += self.widget.winfo_rootx() + 25
+        y += self.widget.winfo_rooty() + 20
+        # creates a toplevel window
+        self.tw = tk.Toplevel(self.widget)
+        # Leaves only the label and removes the app window
+        self.tw.wm_overrideredirect(True)
+        self.tw.wm_geometry("+%d+%d" % (x, y))
+        label = tk.Label(self.tw, text=self.text, justify='left',
+                       background="#ffffff", relief='solid', borderwidth=1,
+                       wraplength = self.wraplength)
+        label.pack(ipadx=1)
+
+    def hidetip(self):
+        tw = self.tw
+        self.tw= None
+        if tw:
+            tw.destroy()
+
 LARGE_FONT = ("Roboto", 12)
 REGULAR_FONT = ("Montserrat Regular", 10)
 SMALL_FONT = ("Montserrat Regular", 8)
@@ -315,6 +376,7 @@ class RootFrame(tk.Tk):
                     This method is the same as the for loop in the __init__, except it passes each question as its own instance
                     It takes from a question_list generated from the types of question chosen by the user
                 """
+                self.geometry("800x300")
                 length, section_length = len(question_lists[0])*10, 10
                 self.create_sidebox(length)
                 difficulty, difficulty_before = "easy", ""
@@ -482,6 +544,7 @@ class RootFrame(tk.Tk):
                         self.users[self.current_user.get()].user_write()
                         #self.load_user_set(self.current_user.get())
                         self.user_saved = True
+                        self.geometry("600x300")
 
         def new_user(self, value):
                 # Makes a new user.
@@ -506,7 +569,7 @@ class StartingPage(tk.Frame):
                 top_frame = tk.Frame(self, bg=THEMING[controller.theme_number.get()]["color_primary"])
                 row_column_configure(top_frame, 2, 1)
                 top_frame.pack(fill="both", expand=True, padx=5, pady=10)
-                label = ttk.Label(top_frame, text="Welcome to NCEA Level 3 Calculus External Revision Quiz.", font=LARGE_FONT)
+                label = ttk.Label(top_frame, text="Kia Ora! Welcome to NCEA Level 3 Calculus External Revision Quiz.", font=LARGE_FONT)
                 label.grid(row=0, column=0)
                 img = tk.PhotoImage(file="math-logo.gif")
                 image_label = tk.Label(top_frame, bg=THEMING[controller.theme_number.get()]["color_primary"], image=img)
@@ -568,6 +631,13 @@ class SelectionPage(tk.Frame):
                 section_check_off = ttk.Radiobutton(self, text="Sections Off", variable=controller.section_check, value=True)
                 section_check_on.grid(row=2, column=2, sticky="nsew")
                 section_check_off.grid(row=4, column=2, sticky="nsew")
+
+                # Tool tips
+                complex_ttp = CreateToolTip(complex_check, "Allow Complex Numbers questions to appear.")
+                differentiation_ttp = CreateToolTip(differentiation_check, "Allow Differentiation questions to appear.")
+                integration_ttp = CreateToolTip(integration_check, "Montserrat-Regular.ttf")
+                section_on_ttp = CreateToolTip(section_check_on, 'Sort each question type into sections.')
+                section_off_ttp = CreateToolTip(section_check_off, 'Randomize each question type.')
 
                 button = ttk.Button(self, text="Start Quiz", command=lambda: controller.start_quiz())
                 button.grid(row=7, column=1, columnspan=2, sticky="ew")
